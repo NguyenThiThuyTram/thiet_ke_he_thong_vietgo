@@ -1,0 +1,131 @@
+@startuml
+' D02 - USE CASE DIAGRAM TONG THE VIETGO
+' Ve theo huong dan UML (slide Bai 7, trang 7-14)
+left to right direction
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam rectangleBorderColor black
+skinparam rectangleBackgroundColor white
+skinparam usecaseBorderColor black
+skinparam usecaseBackgroundColor white
+skinparam ArrowColor black
+
+actor "Người gửi hàng" as Sender
+actor "Quản trị viên" as Admin
+actor "GHN / GHTK\n(API bên ngoài)" as Carrier
+
+rectangle "HỆ THỐNG VIETGO" {
+  together {
+    usecase "Đăng ký" as Register
+    usecase "Đăng nhập" as Login
+    usecase "Đăng xuất" as Logout
+  }
+
+  together {
+    usecase "UC-01\nTra cứu và so sánh cước" as UC01
+    usecase "Nhập thông tin đơn hàng" as Input
+    usecase "Lấy báo giá GHN/GHTK" as Rates
+    usecase "Xem ETA (nếu có)" as ETA
+  }
+
+  together {
+    usecase "Chọn dịch vụ vận chuyển" as Choose
+    usecase "UC-02\nXác nhận và tạo vận đơn" as UC02
+    usecase "Kiểm tra và xác nhận\nthông tin đơn" as Confirm
+    usecase "Gửi yêu cầu tạo đơn\nđến carrier" as Book
+    usecase "Chỉnh sửa trước khi xác nhận" as Edit
+    usecase "Xem danh sách vận đơn" as List
+    usecase "Lọc theo hãng / trạng thái" as Filter
+    usecase "Xem chi tiết vận đơn" as Detail
+  }
+
+  together {
+    usecase "UC-03\nTheo dõi trạng thái vận chuyển" as UC03
+    usecase "Xem lịch sử vận chuyển" as History
+    usecase "Làm mới trạng thái từ carrier" as Refresh
+  }
+
+  together {
+    usecase "UC-04\nXem thông tin COD" as UC04
+    usecase "Xem số tiền thu hộ" as Amount
+    usecase "Xem trạng thái COD (nếu có)" as CodStatus
+    usecase "Đồng bộ dữ liệu COD\ntừ carrier" as CodSync
+  }
+
+  rectangle "P1 - MỞ RỘNG (không thuộc MVP)" {
+    usecase "UC-05 RepeatBox\nLập lịch và tạo bản nháp" as Repeat
+    usecase "Yêu cầu hủy vận đơn" as Cancel
+    usecase "Nhận webhook trạng thái" as Webhook
+    usecase "Quản trị / xem lỗi API" as AdminView
+  }
+}
+
+' Association: duong lien, KHONG co mui ten.
+Sender -- Register
+Sender -- Login
+Sender -- Logout
+Sender -- UC01
+Sender -- Choose
+Sender -- UC02
+Sender -- Edit
+Sender -- List
+Sender -- Detail
+Sender -- UC03
+Sender -- UC04
+Sender -- Repeat
+Sender -- Cancel
+
+Admin -- Login
+Admin -- Logout
+Admin -- AdminView
+
+Carrier -- Rates
+Carrier -- Book
+Carrier -- Refresh
+Carrier -- CodSync
+Carrier -- Webhook
+
+' <<include>>: tu use case chinh den hanh vi bat buoc.
+UC01 ..> Input : <<include>>
+UC01 ..> Rates : <<include>>
+UC02 ..> Choose : <<include>>
+UC02 ..> Confirm : <<include>>
+UC02 ..> Book : <<include>>
+UC04 ..> Amount : <<include>>
+
+' <<extend>>: tu hanh vi tuy chon den use case goc.
+History ..> UC03 : <<extend>>
+ETA ..> UC01 : <<extend>>
+Edit ..> UC02 : <<extend>>
+Filter ..> List : <<extend>>
+Refresh ..> UC03 : <<extend>>
+CodStatus ..> UC04 : <<extend>>
+
+' CodSync la nghiep vu dong bo voi he thong ben ngoai.
+' KHONG ve CodSync extend CodStatus (dong bo khong phai thao tac xem).
+note right of CodSync
+  Lấy trạng thái COD khi hãng hỗ trợ.
+  Nếu không có, hiển thị "Chưa có dữ liệu".
+end note
+
+note bottom of Edit
+  Chỉ sửa trước khi tạo vận đơn.
+  Thông tin ảnh hưởng cước => báo giá lại (UC-01).
+  Sửa vận đơn đã xác nhận: ngoài P0.
+end note
+
+note bottom of UC04
+  Đơn có COD hoặc không COD (cod_amount = 0).
+  VietGo không trực tiếp thu hộ hay đối soát COD.
+end note
+
+note bottom of Repeat
+  P1 tạo bản nháp theo lịch, KHÔNG tự đặt vận đơn.
+  Shop tự lấy báo giá mới và xác nhận tạo đơn.
+end note
+@enduml
