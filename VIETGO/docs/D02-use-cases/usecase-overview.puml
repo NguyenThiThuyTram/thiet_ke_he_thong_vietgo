@@ -1,0 +1,100 @@
+@startuml
+left to right direction
+skinparam monochrome true
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam ArrowColor black
+skinparam usecase {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam packageStyle rectangle
+
+actor "Người gửi hàng" as U3
+actor "Quản trị viên" as U4
+actor "GHN / GHTK\n(API bên ngoài)" as U5
+
+rectangle "HỆ THỐNG VIETGO" {
+  package "TÀI KHOẢN - P0" {
+    usecase "Đăng ký" as U17
+    usecase "Đăng nhập" as U18
+    usecase "Đăng xuất" as U19
+  }
+  package "WF-01 - BÁO GIÁ VÀ SO SÁNH - P0" {
+    usecase "UC-01\nTra cứu và so sánh cước" as U20
+    usecase "Nhập thông tin đơn hàng" as U21
+    usecase "Lấy báo giá GHN / GHTK" as U22
+    usecase "Xem ETA (nếu có)" as U23
+  }
+  package "WF-02 - TẠO VÀ QUẢN LÝ VẬN ĐƠN - P0" {
+    usecase "UC-02\nXác nhận và tạo vận đơn" as U24
+    usecase "Chọn dịch vụ vận chuyển" as U25
+    usecase "Kiểm tra và xác\nnhận thông tin đơn" as U26
+    usecase "Gửi yêu cầu\ntạo đơn đến carrier" as U27
+    usecase "Sửa thông tin\ntrước khi xác nhận" as U28
+    usecase "Xem danh sách vận đơn" as U29
+    usecase "Lọc theo hãng / trạng thái" as U30
+    usecase "Xem chi tiết vận đơn" as U31
+  }
+  package "WF-03 - TRACKING - P0" {
+    usecase "UC-03\nTheo dõi trạng thái vận chuyển" as U32
+    usecase "Xem lịch sử vận chuyển" as U33
+    usecase "Làm mới trạng thái từ carrier" as U34
+  }
+  package "WF-04 - THÔNG TIN COD - P0" {
+    usecase "UC-04\nXem thông tin COD" as U35
+    usecase "Xem số tiền thu hộ" as U36
+    usecase "Xem trạng thái COD\n(nếu có dữ liệu)" as U37
+    usecase "Đồng bộ dữ\nliệu COD từ carrier" as U38
+  }
+  package "PHẦN MỞ RỘNG - P1" {
+    usecase "UC-05 RepeatBox\nLập lịch gửi hàng" as U40
+    usecase "Quản lý mẫu đơn" as U41
+    usecase "Thiết lập / quản lý lịch gửi" as U42
+    usecase "Tạo bản nháp theo kỳ" as U43
+    usecase "Bỏ qua / tạm dừng kỳ" as U44
+    usecase "Yêu cầu hủy vận đơn" as U45
+    usecase "Nhận webhook trạng thái" as U46
+    usecase "Quản trị / xem lỗi API" as U47
+  }
+}
+
+U3 -- U17
+U3 -- U18
+U3 -- U19
+U3 -- U20
+U3 -- U24
+U3 -- U29
+U3 -- U31
+U3 -- U32
+U3 -- U35
+U3 -- U40
+U3 -- U45
+U4 -- U18
+U4 -- U19
+U4 -- U47
+U5 -- U22
+U5 -- U27
+U5 -- U34
+U5 -- U38
+U5 -- U46
+U20 ..> U21 : <<include>>
+U20 ..> U22 : <<include>>
+U24 ..> U25 : <<include>>
+U24 ..> U26 : <<include>>
+U24 ..> U27 : <<include>>
+U35 ..> U36 : <<include>>
+U40 ..> U41 : <<include>>
+U40 ..> U42 : <<include>>
+U23 ..> U20 : <<extend>>
+U28 ..> U24 : <<extend>>
+U30 ..> U29 : <<extend>>
+U33 ..> U32 : <<extend>>
+U34 ..> U32 : <<extend>>
+U37 ..> U35 : <<extend>>
+U44 ..> U40 : <<extend>>
+U40 ..> U43 : <<include>>
+
+@enduml
