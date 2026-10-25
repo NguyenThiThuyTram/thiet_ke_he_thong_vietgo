@@ -1,0 +1,203 @@
+// VIETGO P0 - D03: Core relational schema
+// Based on user's schema (1).dbml and the VietGo D03/UC-01..UC-04 scope.
+// PostgreSQL-oriented: jsonb snapshots, timestamptz timestamps recommended at implementation.
+// Business CHECK constraints and cross-table validations are in constraints-postgresql.sql.
+// Future recurring-shipment tables are in schema-p1-extension.dbml, NOT in this P0 ERD.
+
+Table users {
+  user_id bigint [pk, increment]
+  full_name varchar(100) [not null]
+  email varchar(255) [not null, unique]
+  password_hash varchar(255) [not null, note: 'Store a secure password hash, never the original password']
+  phone varchar(20)
+  created_at timestamp [not null, default: `now()`]
+}
+
+Table rate_requests {
+  rate_request_id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.user_id, note: 'Owner; P0 assumes logged-in quote requests']
+  sender_name varchar(100) [not null]
+  sender_phone varchar(20) [not null]
+  sender_address text [not null]
+  sender_province_code varchar(40) [not null]
+  sender_ward_code varchar(40) [not null]
+  receiver_name varchar(100) [not null]
+  receiver_phone varchar(20) [not null]
+  receiver_address text [not null]
+  receiver_province_code varchar(40) [not null]
+  receiver_ward_code varchar(40) [not null]
+  payer varchar(20) [not null, default: 'SHOP', note: 'SHOP or RECEIVER']
+  cod_amount bigint [not null, default: 0, note: 'VND; >= 0']
+  created_at timestamp [not null, default: `now()`]
+  indexes {
+    (user_id, created_at)
+  }
+}
+
+Table parcels {
+  parcel_id bigint [pk, increment]
+  rate_request_id bigint [not null, unique, ref: > rate_requests.rate_request_id, note: 'One parcel per P0 quote request']
+  item_description text [note: 'Optional summary; product rows live in parcel_items']
+  weight_grams int [not null, note: 'grams; > 0']
+  length_cm decimal(8,2) [note: 'cm; > 0 when supplied']
+  width_cm decimal(8,2) [note: 'cm; > 0 when supplied']
+  height_cm decimal(8,2) [note: 'cm; > 0 when supplied']
+  declared_value bigint [note: 'VND; >= 0 when supplied']
+}
+
+Table parcel_items {
+  parcel_item_id bigint [pk, increment]
+  parcel_id bigint [not null, ref: > parcels.parcel_id]
+  item_name varchar(255) [not null]
+  quantity int [not null, note: 'quantity > 0']
+  item_price bigint [note: 'Optional product unit price in VND']
+  item_code varchar(100) [note: 'Optional shop SKU; future compatible']
+  indexes {
+    parcel_id
+  }
+}
+
+Table carriers {
+  carrier_id bigint [pk, increment]
+  carrier_code varchar(20) [not null, unique, note: 'GHN, GHTK in P0']
+  carrier_name varchar(100) [not null]
+  is_active boolean [not null, default: true]
+}
+
+Table carrier_services {
+  service_id bigint [pk, increment]
+  carrier_id bigint [not null, ref: > carriers.carrier_id]
+  service_code varchar(60) [not null, note: 'Raw carrier-specific service code']
+  service_name varchar(100) [not null]
+  is_active boolean [not null, default: true]
+  indexes {
+    (carrier_id, service_code) [unique]
+    (service_id, carrier_id) [unique, note: 'Composite FK target to prevent cross-carrier rates']
+  }
+}
+
+Table quote_attempts {
+  quote_attempt_id bigint [pk, increment]
+  rate_request_id bigint [not null, ref: > rate_requests.rate_request_id]
+  carrier_id bigint [not null, ref: > carriers.carrier_id]
+  request_status varchar(30) [not null, note: 'PENDING/SUCCESS/NO_SERVICE/FAILED/TIMEOUT/INVALID_RESPONSE']
+  error_code varchar(60)
+  error_message text
+  is_mock boolean [not null, default: false, note: 'Demo/test provenance, not a carrier response field']
+  requested_at timestamp [not null, default: `now()`]
+  completed_at timestamp
+  indexes {
+    (rate_request_id, carrier_id, requested_at)
+    (quote_attempt_id, carrier_id) [unique, note: 'Composite FK target to prevent cross-carrier rates']
+  }
+}
+
+Table rates {
+  rate_id bigint [pk, increment]
+  quote_attempt_id bigint [not null]
+  carrier_id bigint [not null, note: 'Redundant but constrained via composite FKs']
+  service_id bigint [not null]
+  carrier_rate_id varchar(100)
+  shipping_fee bigint [note: 'VND; nullable on partial or unavailable response']
+  surcharge_fee bigint [note: 'VND; nullable if not returned']
+  service_fee bigint [note: 'VND; nullable if not returned']
+  total_fee bigint [note: 'VND; nullable if not returned']
+  fee_data_status varchar(30) [not null, default: 'UNAVAILABLE', note: 'COMPLETE/PARTIAL/UNAVAILABLE']
+  eta_min_days int [note: 'days; nullable']
+  eta_max_days int [note: 'days; nullable']
+  eta_expected_at timestamp [note: 'Carrier estimated delivery datetime when available']
+  eta_source varchar(60)
+  eta_raw text [note: 'Original ETA value for audit and fallback']
+  is_available boolean [not null, default: false]
+  quoted_at timestamp [not null, default: `now()`]
+  expires_at timestamp
+  indexes {
+    (quote_attempt_id, service_id) [unique, note: 'One result per service within an attempt']
+    (service_id, carrier_id)
+    (rate_id, carrier_id) [unique, note: 'Composite FK target for shipments']
+  }
+}
+
+Table shipment_statuses {
+  status_code varchar(30) [pk]
+  status_name varchar(100) [not null]
+  is_final boolean [not null, default: false]
+}
+
+Table shipments {
+  shipment_id bigint [pk, increment]
+  booking_key varchar(100) [not null, unique, note: 'Stable idempotency key for one logical booking']
+  user_id bigint [not null, ref: > users.user_id, note: 'Must match rate request owner']
+  rate_id bigint [not null, unique]
+  carrier_id bigint [not null, note: 'Constrained by selected rate composite FK']
+  vietgo_tracking_code varchar(100) [not null, unique]
+  carrier_tracking_code varchar(100) [note: 'Available only after carrier confirmation']
+  booking_status varchar(30) [not null, default: 'PENDING', note: 'PENDING/SUCCESS/FAILED/UNKNOWN']
+  shipment_status varchar(30) [ref: > shipment_statuses.status_code]
+  sender_name varchar(100) [not null]
+  sender_phone varchar(20) [not null]
+  sender_address text [not null]
+  sender_province_code varchar(40) [not null]
+  sender_ward_code varchar(40) [not null]
+  receiver_name varchar(100) [not null]
+  receiver_phone varchar(20) [not null]
+  receiver_address text [not null]
+  receiver_province_code varchar(40) [not null]
+  receiver_ward_code varchar(40) [not null]
+  payer varchar(20) [not null, note: 'SHOP or RECEIVER; immutable booking snapshot']
+  parcel_snapshot jsonb [not null, note: 'Parcel and items as sent to carrier, immutable booking snapshot']
+  cod_amount bigint [not null, default: 0, note: 'VND; declared COD for booking']
+  cod_data_status varchar(30) [not null, default: 'NOT_APPLICABLE', note: 'NOT_APPLICABLE/PENDING/AVAILABLE/UNSUPPORTED/ERROR']
+  cod_status varchar(40) [note: 'Normalized COD collection status, if provided']
+  cod_carrier_status varchar(100) [note: 'Raw carrier COD status, if provided']
+  cod_source varchar(50)
+  cod_updated_at timestamp
+  confirmed_shipping_fee bigint [note: 'VND; amount confirmed by carrier']
+  confirmed_total_fee bigint [note: 'VND; actual total confirmed by carrier']
+  tracking_sync_status varchar(30) [note: 'SUCCESS/NO_UPDATE/ERROR; NULL before first refresh']
+  tracking_last_checked_at timestamp
+  tracking_last_error text
+  status_updated_at timestamp
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  indexes {
+    (user_id, created_at)
+    (carrier_id, carrier_tracking_code) [unique, note: 'External code unique only within carrier; NULL permitted']
+  }
+}
+
+Table booking_attempts {
+  attempt_id bigint [pk, increment]
+  shipment_id bigint [not null, ref: > shipments.shipment_id]
+  attempt_no int [not null, note: 'Positive sequence within one logical booking']
+  attempt_status varchar(30) [not null, note: 'PENDING/SUCCESS/FAILED/UNKNOWN']
+  carrier_reference varchar(100)
+  error_code varchar(60)
+  error_message text
+  attempted_at timestamp [not null, default: `now()`]
+  completed_at timestamp
+  indexes {
+    (shipment_id, attempt_no) [unique]
+  }
+}
+
+Table tracking_events {
+  tracking_event_id bigint [pk, increment]
+  shipment_id bigint [not null, ref: > shipments.shipment_id]
+  carrier_event_id varchar(100)
+  event_fingerprint varchar(128) [not null, note: 'Deterministic hash for idempotent carrier event intake']
+  carrier_status varchar(100) [not null, note: 'Raw unmapped code must be preserved']
+  normalized_status varchar(30) [ref: > shipment_statuses.status_code, note: 'Nullable if carrier status cannot be mapped']
+  description text
+  event_time timestamp [note: 'Nullable when carrier omits event time']
+  received_at timestamp [not null, default: `now()`]
+  indexes {
+    (shipment_id, event_fingerprint) [unique]
+    (shipment_id, event_time)
+  }
+}
+
+// Defend against mismatched provider-service pairs, including during quote retries.
+Ref: rates.(quote_attempt_id, carrier_id) > quote_attempts.(quote_attempt_id, carrier_id)
+Ref: rates.(service_id, carrier_id) > carrier_services.(service_id, carrier_id)
+Ref: shipments.(rate_id, carrier_id) > rates.(rate_id, carrier_id)
