@@ -57,24 +57,24 @@
 1. Người gửi chọn dịch vụ hợp lệ từ kết quả báo giá UC-01.
 2. VietGo hiển thị màn hình xác nhận: người gửi, người nhận, kiện hàng, hãng, dịch vụ, cước/phụ phí và COD nếu có.
 3. Người gửi kiểm tra và xác nhận tạo vận đơn.
-4. VietGo kiểm tra dữ liệu, quyền tài khoản, hiệu lực báo giá và chống tạo đơn trùng.
-5. Backend VietGo gửi yêu cầu tạo đơn đến carrier đã chọn; không lộ khóa API trên trình duyệt.
+4. VietGo kiểm tra dữ liệu, quyền tài khoản, hiệu lực báo giá; khởi tạo hoặc tái sử dụng `booking_key` duy nhất cho lần xác nhận này, lưu trạng thái `PENDING`, và khóa xử lý đồng thời trên cùng `booking_key` để chống tạo trùng.
+5. Backend VietGo gửi yêu cầu tạo đơn đến carrier đã chọn, kèm mã tham chiếu/idempotency key nếu API hãng hỗ trợ; ghi nhận `booking_key`, carrier, request và từng `booking_attempt` để đối chiếu; không lộ khóa API trên trình duyệt.
 6. Carrier xác nhận hợp lệ và trả mã vận đơn hãng cùng các thông tin liên quan.
-7. VietGo lưu vận đơn, mã tham chiếu, mã carrier, phí, COD và trạng thái có căn cứ.
+7. Khi carrier xác nhận đã tạo, VietGo gắn mã carrier với `booking_key`, cập nhật `booking_status = SUCCESS` và lưu vận đơn, phí, COD, trạng thái có căn cứ; một `booking_key` chỉ được liên kết tối đa một vận đơn thành công.
 8. VietGo thông báo tạo thành công và hiển thị chi tiết vận đơn.
 
 ### Alternate Flow
 - **A1 — Sửa trước khi xác nhận:** Người gửi quay lại sửa; VietGo kiểm tra và báo giá lại nếu thay đổi ảnh hưởng đến phí/dịch vụ.
 - **A2 — Giá/dịch vụ hết hiệu lực:** Yêu cầu tra cứu và chọn lại; không tạo theo báo giá cũ.
 - **A3 — Thiếu thông tin tùy chọn trong phản hồi:** Chỉ hiển thị phần được xác nhận, trường thiếu ghi **Chưa có dữ liệu**.
-- **A4 — Xác nhận nhiều lần:** VietGo nhận diện yêu cầu trùng, không tạo thêm vận đơn và cho biết tình trạng yêu cầu ban đầu.
+- **A4 — Xác nhận nhiều lần:** Các thao tác lặp của cùng lần xác nhận phải dùng lại `booking_key`; khi `PENDING` hoặc `UNKNOWN`, không phát sinh booking mới và hiển thị trạng thái đang xử lý/xác minh. Khi `SUCCESS`, trả về vận đơn đã có; chỉ tạo `booking_key` mới cho yêu cầu đặt đơn mới có chủ đích.
 
 ### Exception Flow
-- **E1 — Carrier từ chối:** Thông báo lý do hợp lệ (ví dụ sai địa chỉ hoặc ngoài phạm vi phục vụ), không báo thành công.
-- **E2 — Timeout/mất kết nối:** Kết quả tạo đơn **chưa rõ**; hiển thị **Đang xác minh**, tra trạng thái theo tham chiếu trước khi thử lại để tránh trùng đơn.
-- **E3 — Phản hồi không đủ tin cậy hoặc lỗi lưu:** Không xác nhận thành công; lưu dấu vết để kiểm tra/khôi phục.
+- **E1 — Carrier từ chối rõ ràng:** Đánh dấu `booking_status = FAILED`, lưu mã lỗi/lý do từ chối; thông báo cho người gửi, không báo thành công. Chỉ cho gửi một yêu cầu mới sau khi người gửi sửa/chọn lại và xác nhận.
+- **E2 — Timeout/mất kết nối, kết quả chưa rõ:** Đánh dấu `booking_status = UNKNOWN` (không coi là FAILED), giữ nguyên `booking_key` và thông tin `booking_attempt`. Hiển thị **Đang xác minh kết quả tạo vận đơn**. Trước mọi lần retry, VietGo đối chiếu mã tham chiếu/booking key hoặc tìm đơn bên carrier qua API được hỗ trợ. Nếu xác nhận carrier **đã tạo đơn** → cập nhật `SUCCESS`, lưu mã vận đơn, **không gửi lại**. Nếu carrier **xác nhận chưa tạo** và retry an toàn theo cơ chế hãng hỗ trợ → mới cho retry có kiểm soát với cùng khóa tham chiếu khi hỗ trợ, không chạy đồng thời. Nếu carrier **không hỗ trợ tra cứu hoặc vẫn chưa xác định** → giữ `UNKNOWN`, chờ đối soát/kiểm tra thủ công; **không tự động retry**.
+- **E3 — Phản hồi không đủ tin cậy hoặc lỗi lưu:** Giữ `UNKNOWN` nếu chưa xác minh được kết quả carrier; không báo thành công hay gửi lại mù quáng. Lưu vết giao dịch và ưu tiên tra cứu/đối soát mã vận đơn trước khi khôi phục dữ liệu.
 
-**Business Rules / NFR:** Chỉ tạo vận đơn sau khi người dùng xác nhận; không tạo đơn trùng khi retry; timeout API tối đa 10 giây/yêu cầu theo thiết kế; không thu tiền online trong MVP.
+**Business Rules / NFR:** `booking_key` là khóa duy nhất và bất biến cho một lần xác nhận tạo vận đơn; các lần bấm lặp và retry của cùng yêu cầu tái sử dụng khóa này. `booking_status`: `PENDING` (đang xử lý), `SUCCESS` (carrier xác nhận đã tạo), `FAILED` (carrier xác nhận từ chối/chưa tạo), `UNKNOWN` (timeout/lỗi khiến kết quả chưa thể kết luận). `UNKNOWN` không được tự chuyển sang `FAILED` hoặc tự retry; phải xác minh từ carrier trước. Khóa duy nhất/transaction ngăn hai tiến trình booking đồng thời, và lưu lịch sử `booking_attempts`. Timeout API tối đa 10 giây/yêu cầu theo thiết kế; không thu tiền online trong MVP.
 
 ---
 
