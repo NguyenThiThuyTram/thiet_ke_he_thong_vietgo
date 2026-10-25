@@ -177,7 +177,7 @@
 2. VietGo kiểm tra và lưu mẫu vận đơn.
 3. Người gửi thiết lập chu kỳ tuần/tháng, ngày áp dụng rồi kích hoạt kế hoạch.
 4. VietGo lưu kế hoạch ở trạng thái hoạt động; chưa gửi API tạo vận đơn.
-5. Khi đến kỳ, Scheduler kiểm tra kế hoạch và ràng buộc tránh trùng `(plan_id, scheduled_date)`, rồi tạo đúng một bản nháp nội bộ.
+5. Khi đến kỳ, Scheduler kiểm tra kế hoạch và ràng buộc tránh trùng `(repeat_plan_id, scheduled_for)`, rồi tạo đúng một bản nháp nội bộ.
 6. Người gửi mở bản nháp, kiểm tra hoặc chỉnh sửa nội dung.
 7. Khi muốn đặt đơn, người gửi yêu cầu báo giá **mới** qua UC-01, chọn dịch vụ rồi chủ động xác nhận tạo vận đơn qua UC-02.
 8. VietGo liên kết vận đơn đã được xác nhận với kỳ gửi tương ứng.
@@ -187,12 +187,12 @@
 - **A2 – Tiếp tục:** Kích hoạt lại kế hoạch và chỉ xử lý các kỳ còn hiệu lực.
 - **A3 – Bỏ qua kỳ:** Ghi nhận kỳ gửi là `SKIPPED`, không tạo đơn.
 - **A4 – Sửa mẫu/lịch:** Thay đổi áp dụng cho kỳ tương lai; không tự sửa bản nháp đã tạo.
-- **A5 – Chưa muốn gửi:** Giữ bản nháp `DRAFT`, không gọi API carrier.
+- **A5 – Chưa muốn gửi:** Giữ bản nháp `DRAFT_READY`, không gọi API carrier.
 - **A6 – Báo giá mới không khả dụng/đã thay đổi:** Giữ bản nháp và cho chọn phương án khác; không sử dụng giá cũ để tự tạo đơn.
 
 ### Exception Flow
 - **E1 – Dữ liệu/lịch sai:** Chỉ rõ lỗi và không kích hoạt kế hoạch.
-- **E2 – Scheduler chạy đồng thời hoặc chạy lại:** Bảo đảm mỗi `(plan_id, scheduled_date)` chỉ được tạo một bản nháp.
+- **E2 – Scheduler chạy đồng thời hoặc chạy lại:** Bảo đảm mỗi `(repeat_plan_id, scheduled_for)` chỉ được tạo một bản nháp.
 - **E3 – Không lưu được bản nháp:** Ghi lỗi, không đánh dấu thành công; cho cơ chế thử lại an toàn.
 - **E4 – Không có quyền truy cập:** Từ chối quản lý mẫu/kế hoạch của tài khoản khác.
 - **E5 – Kế hoạch đã tạm dừng/hủy:** Không tạo nháp mới cho kỳ bị chặn.
