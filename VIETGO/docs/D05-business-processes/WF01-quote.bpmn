@@ -3,26 +3,26 @@
   <bpmn:process id="Process_WF01-quote" name="WF01-quote" isExecutable="false">
     <bpmn:laneSet id="LaneSet_WF01-quote">
       <bpmn:lane id="Lane_System_WF01-quote" name="Hệ thống VietGo">
+        <bpmn:flowNodeRef>Q_Invalid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Q_Validate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Q_Valid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Q_Prepare</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_Fork</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_GHN</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_GHNMap</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_GHTKMap</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_Join</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Q_Notice</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Q_Validate</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Q_Invalid</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Q_Prepare</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Q_Valid</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_GHTK</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Q_Notice</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_Filter</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_Any</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_NoType</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_NoService</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_BothFail</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Q_Partial</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_Display</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_EndNone</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Q_EndError</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Q_Partial</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_User_WF01-quote" name="Người gửi hàng">
         <bpmn:flowNodeRef>Q_Start</bpmn:flowNodeRef>
@@ -32,44 +32,9 @@
         <bpmn:flowNodeRef>Q_EndOK</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="Q_Start" name="Bắt đầu: yêu cầu báo giá">
+    <bpmn:startEvent id="Q_Start" name="Yêu cầu tra cứu cước">
       <bpmn:outgoing>Flow_WF01-quote_1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="Q_Form" name="Nhập địa chỉ, liên hệ, kiện hàng, khối lượng, COD (nếu có)">
-      <bpmn:incoming>Flow_WF01-quote_1</bpmn:incoming>
-      <bpmn:incoming>Flow_WF01-quote_6</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_2</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="Q_Search" name="Chọn “Tra cứu cước”">
-      <bpmn:incoming>Flow_WF01-quote_2</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_3</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:parallelGateway id="Q_Fork" name="Gọi 2 hãng độc lập">
-      <bpmn:incoming>Flow_WF01-quote_8</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_9</bpmn:outgoing>
-      <bpmn:outgoing>Flow_WF01-quote_10</bpmn:outgoing>
-    </bpmn:parallelGateway>
-    <bpmn:task id="Q_GHN" name="Gửi báo giá GHN; timeout tối đa 10 giây">
-      <bpmn:incoming>Flow_WF01-quote_9</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_11</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="Q_GHNMap" name="Kiểm tra / chuẩn hóa GHN; ghi nhận lỗi">
-      <bpmn:incoming>Flow_WF01-quote_11</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_13</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="Q_GHTKMap" name="Kiểm tra / chuẩn hóa GHTK; ghi nhận lỗi">
-      <bpmn:incoming>Flow_WF01-quote_12</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_14</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:parallelGateway id="Q_Join" name="Đã nhận / xử lý cả hai nhánh">
-      <bpmn:incoming>Flow_WF01-quote_13</bpmn:incoming>
-      <bpmn:incoming>Flow_WF01-quote_14</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_15</bpmn:outgoing>
-    </bpmn:parallelGateway>
-    <bpmn:task id="Q_Notice" name="Hiển thị cảnh báo hãng còn lại chưa khả dụng (A1)">
-      <bpmn:incoming>Flow_WF01-quote_23</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_25</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:sequenceFlow id="Flow_WF01-quote_1" sourceRef="Q_Start" targetRef="Q_Form" />
     <bpmn:sequenceFlow id="Flow_WF01-quote_6" name="Nhập lại" sourceRef="Q_Invalid" targetRef="Q_Form" />
     <bpmn:sequenceFlow id="Flow_WF01-quote_2" sourceRef="Q_Form" targetRef="Q_Search" />
@@ -80,45 +45,80 @@
     <bpmn:sequenceFlow id="Flow_WF01-quote_8" sourceRef="Q_Prepare" targetRef="Q_Fork" />
     <bpmn:sequenceFlow id="Flow_WF01-quote_9" sourceRef="Q_Fork" targetRef="Q_GHN" />
     <bpmn:sequenceFlow id="Flow_WF01-quote_10" sourceRef="Q_Fork" targetRef="Q_GHTK" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_11" sourceRef="Q_GHN" targetRef="Q_GHNMap" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_12" sourceRef="Q_GHTK" targetRef="Q_GHTKMap" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_13" sourceRef="Q_GHNMap" targetRef="Q_Join" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_14" sourceRef="Q_GHTKMap" targetRef="Q_Join" />
     <bpmn:sequenceFlow id="Flow_WF01-quote_15" sourceRef="Q_Join" targetRef="Q_Filter" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_16" sourceRef="Q_Filter" targetRef="Q_Any" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_17" name="Không" sourceRef="Q_Any" targetRef="Q_NoType" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_22" name="Có" sourceRef="Q_Any" targetRef="Q_Partial" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_18" name="Không; API hợp lệ" sourceRef="Q_NoType" targetRef="Q_NoService" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_19" name="Có" sourceRef="Q_NoType" targetRef="Q_BothFail" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_20" sourceRef="Q_NoService" targetRef="Q_EndNone" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_21" sourceRef="Q_BothFail" targetRef="Q_EndError" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_23" name="Có" sourceRef="Q_Partial" targetRef="Q_Notice" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_24" name="Không" sourceRef="Q_Partial" targetRef="Q_Display" />
-    <bpmn:sequenceFlow id="Flow_WF01-quote_25" sourceRef="Q_Notice" targetRef="Q_Display" />
     <bpmn:sequenceFlow id="Flow_WF01-quote_26" sourceRef="Q_Display" targetRef="Q_Select" />
     <bpmn:sequenceFlow id="Flow_WF01-quote_27" sourceRef="Q_Select" targetRef="Q_EndOK" />
-    <bpmn:task id="Q_Validate" name="Kiểm tra bắt buộc / định dạng / tính hợp lệ">
-      <bpmn:incoming>Flow_WF01-quote_3</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_4</bpmn:outgoing>
+    <bpmn:task id="Q_Form" name="Nhập thông tin gửi hàng">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Nhập địa chỉ, liên hệ, kiện hàng, khối lượng, COD (nếu có)</bpmn:documentation>
+      <bpmn:incoming>Flow_WF01-quote_1</bpmn:incoming>
+      <bpmn:incoming>Flow_WF01-quote_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_2</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Q_Invalid" name="Nêu trường sai; yêu cầu chỉnh sửa (E1)">
+    <bpmn:task id="Q_Invalid" name="Thông báo dữ liệu không hợp lệ">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Nêu trường sai; yêu cầu chỉnh sửa (E1)</bpmn:documentation>
       <bpmn:incoming>Flow_WF01-quote_5</bpmn:incoming>
       <bpmn:outgoing>Flow_WF01-quote_6</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Q_Prepare" name="Chuẩn hóa địa chỉ, đơn vị theo từng API">
-      <bpmn:incoming>Flow_WF01-quote_7</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_8</bpmn:outgoing>
+    <bpmn:task id="Q_Search" name="Chọn “Tra cứu cước”">
+      <bpmn:incoming>Flow_WF01-quote_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Q_Validate" name="Kiểm tra thông tin gửi hàng">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Kiểm tra bắt buộc / định dạng / tính hợp lệ</bpmn:documentation>
+      <bpmn:incoming>Flow_WF01-quote_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_4</bpmn:outgoing>
     </bpmn:task>
     <bpmn:exclusiveGateway id="Q_Valid" name="Thông tin hợp lệ?">
       <bpmn:incoming>Flow_WF01-quote_4</bpmn:incoming>
       <bpmn:outgoing>Flow_WF01-quote_5</bpmn:outgoing>
       <bpmn:outgoing>Flow_WF01-quote_7</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="Q_GHTK" name="Gửi báo giá GHTK; timeout tối đa 10 giây">
+    <bpmn:task id="Q_Prepare" name="Chuẩn hóa dữ liệu gửi hãng">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Chuẩn hóa địa chỉ, đơn vị theo từng API</bpmn:documentation>
+      <bpmn:incoming>Flow_WF01-quote_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:parallelGateway id="Q_Fork" name="Gọi 2 hãng&#10;độc lập">
+      <bpmn:incoming>Flow_WF01-quote_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_9</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WF01-quote_10</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:task id="Q_GHN" name="Lấy báo giá GHN">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Gửi báo giá GHN; timeout tối đa 10 giây</bpmn:documentation>
+      <bpmn:incoming>Flow_WF01-quote_9</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_11</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Q_GHNMap" name="Kiểm tra báo giá GHN">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Kiểm tra / chuẩn hóa GHN; ghi nhận lỗi</bpmn:documentation>
+      <bpmn:incoming>Flow_WF01-quote_11</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_13</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Q_GHTKMap" name="Kiểm tra báo giá GHTK">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Kiểm tra / chuẩn hóa GHTK; ghi nhận lỗi</bpmn:documentation>
+      <bpmn:incoming>Flow_WF01-quote_12</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_14</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:parallelGateway id="Q_Join" name="Đã nhận / xử lý cả hai nhánh">
+      <bpmn:incoming>Flow_WF01-quote_13</bpmn:incoming>
+      <bpmn:incoming>Flow_WF01-quote_14</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_15</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:task id="Q_GHTK" name="Lấy báo giá GHTK">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Gửi báo giá GHTK; timeout tối đa 10 giây</bpmn:documentation>
       <bpmn:incoming>Flow_WF01-quote_10</bpmn:incoming>
       <bpmn:outgoing>Flow_WF01-quote_12</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Q_Filter" name="Loại dịch vụ không hỗ trợ; phân biệt phí/ETA thiếu (A2-A4, E3)">
+    <bpmn:sequenceFlow id="Flow_WF01-quote_11" sourceRef="Q_GHN" targetRef="Q_GHNMap" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_13" sourceRef="Q_GHNMap" targetRef="Q_Join" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_12" sourceRef="Q_GHTK" targetRef="Q_GHTKMap" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_14" sourceRef="Q_GHTKMap" targetRef="Q_Join" />
+    <bpmn:task id="Q_Notice" name="Cảnh báo hãng chưa khả dụng">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Hiển thị cảnh báo hãng còn lại chưa khả dụng (A1)</bpmn:documentation>
+      <bpmn:incoming>Flow_WF01-quote_23</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_25</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Q_Filter" name="Lọc báo giá không phù hợp">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Loại dịch vụ không hỗ trợ; phân biệt phí/ETA thiếu (A2-A4, E3)</bpmn:documentation>
       <bpmn:incoming>Flow_WF01-quote_15</bpmn:incoming>
       <bpmn:outgoing>Flow_WF01-quote_16</bpmn:outgoing>
     </bpmn:task>
@@ -132,35 +132,49 @@
       <bpmn:outgoing>Flow_WF01-quote_18</bpmn:outgoing>
       <bpmn:outgoing>Flow_WF01-quote_19</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="Q_NoService" name="Không có dịch vụ phù hợp (A5); cho nhập lại">
+    <bpmn:task id="Q_NoService" name="Thông báo không có dịch vụ">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Không có dịch vụ phù hợp (A5); cho nhập lại</bpmn:documentation>
       <bpmn:incoming>Flow_WF01-quote_18</bpmn:incoming>
       <bpmn:outgoing>Flow_WF01-quote_20</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Q_BothFail" name="Ghi lỗi; báo không thể lấy giá; cho thử lại (E2/E3)">
+    <bpmn:task id="Q_BothFail" name="Thông báo lỗi tra cứu cước">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Ghi lỗi; báo không thể lấy giá; cho thử lại (E2/E3)</bpmn:documentation>
       <bpmn:incoming>Flow_WF01-quote_19</bpmn:incoming>
       <bpmn:outgoing>Flow_WF01-quote_21</bpmn:outgoing>
     </bpmn:task>
+    <bpmn:task id="Q_Display" name="Hiển thị so sánh phí và ETA">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Hiển thị bảng so sánh phí / ETA có căn cứ (VNĐ)</bpmn:documentation>
+      <bpmn:incoming>Flow_WF01-quote_24</bpmn:incoming>
+      <bpmn:incoming>Flow_WF01-quote_25</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF01-quote_26</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="Q_EndNone" name="Không có dịch vụ phù hợp">
+      <bpmn:incoming>Flow_WF01-quote_20</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Q_EndError" name="Tra cứu báo giá thất bại">
+      <bpmn:incoming>Flow_WF01-quote_21</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_WF01-quote_23" name="Có" sourceRef="Q_Partial" targetRef="Q_Notice" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_25" sourceRef="Q_Notice" targetRef="Q_Display" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_16" sourceRef="Q_Filter" targetRef="Q_Any" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_17" name="Không" sourceRef="Q_Any" targetRef="Q_NoType" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_22" name="Có" sourceRef="Q_Any" targetRef="Q_Partial" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_18" name="Không; API hợp lệ" sourceRef="Q_NoType" targetRef="Q_NoService" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_19" name="Có" sourceRef="Q_NoType" targetRef="Q_BothFail" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_20" sourceRef="Q_NoService" targetRef="Q_EndNone" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_21" sourceRef="Q_BothFail" targetRef="Q_EndError" />
+    <bpmn:sequenceFlow id="Flow_WF01-quote_24" name="Không" sourceRef="Q_Partial" targetRef="Q_Display" />
     <bpmn:exclusiveGateway id="Q_Partial" name="Chỉ một hãng có Rate?">
       <bpmn:incoming>Flow_WF01-quote_22</bpmn:incoming>
       <bpmn:outgoing>Flow_WF01-quote_23</bpmn:outgoing>
       <bpmn:outgoing>Flow_WF01-quote_24</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="Q_Display" name="Hiển thị bảng so sánh phí / ETA có căn cứ (VNĐ)">
-      <bpmn:incoming>Flow_WF01-quote_24</bpmn:incoming>
-      <bpmn:incoming>Flow_WF01-quote_25</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF01-quote_26</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:endEvent id="Q_EndNone" name="Kết thúc: không có Rate">
-      <bpmn:incoming>Flow_WF01-quote_20</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:endEvent id="Q_EndError" name="Kết thúc: lỗi báo giá">
-      <bpmn:incoming>Flow_WF01-quote_21</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:task id="Q_Select" name="So sánh và chọn Rate hợp lệ">
+    <bpmn:task id="Q_Select" name="Chọn báo giá hợp lệ">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): So sánh và chọn Rate hợp lệ</bpmn:documentation>
       <bpmn:incoming>Flow_WF01-quote_26</bpmn:incoming>
       <bpmn:outgoing>Flow_WF01-quote_27</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:endEvent id="Q_EndOK" name="Kết thúc: chuyển UC-02; chưa có vận đơn">
+    <bpmn:endEvent id="Q_EndOK" name="Đã chọn báo giá để tạo vận đơn">
       <bpmn:incoming>Flow_WF01-quote_27</bpmn:incoming>
     </bpmn:endEvent>
   </bpmn:process>
@@ -174,292 +188,285 @@
   <bpmndi:BPMNDiagram id="Diagram_WF01-quote">
     <bpmndi:BPMNPlane id="Plane_WF01-quote" bpmnElement="Collab_WF01-quote">
       <bpmndi:BPMNShape id="Shape_Participant_Main_WF01-quote" bpmnElement="Participant_Main_WF01-quote" isHorizontal="true">
-        <dc:Bounds x="150" y="40" width="5000" height="1060" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Lane_System_WF01-quote" bpmnElement="Lane_System_WF01-quote" isHorizontal="true">
-        <dc:Bounds x="182" y="40" width="4968" height="850" />
+        <dc:Bounds x="150" y="40" width="3900" height="1060" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Lane_User_WF01-quote" bpmnElement="Lane_User_WF01-quote" isHorizontal="true">
-        <dc:Bounds x="182" y="890" width="4968" height="210" />
+        <dc:Bounds x="182" y="890" width="3868" height="210" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_System_WF01-quote" bpmnElement="Lane_System_WF01-quote" isHorizontal="true">
+        <dc:Bounds x="182" y="40" width="3868" height="850" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_Start" bpmnElement="Q_Start">
         <dc:Bounds x="240" y="968" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="218" y="1006" width="83" height="27" />
+          <dc:Bounds x="220" y="1016" width="79" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_Form" bpmnElement="Q_Form">
-        <dc:Bounds x="377" y="948" width="290" height="78" />
+        <dc:Bounds x="325" y="948" width="290" height="78" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Q_Invalid" bpmnElement="Q_Invalid">
+        <dc:Bounds x="322" y="196" width="295" height="88" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_Search" bpmnElement="Q_Search">
-        <dc:Bounds x="750" y="952" width="220" height="72" />
+        <dc:Bounds x="670" y="951" width="220" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Q_Validate" bpmnElement="Q_Validate">
+        <dc:Bounds x="802" y="538" width="275" height="84" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Q_Valid" bpmnElement="Q_Valid" isMarkerVisible="true">
+        <dc:Bounds x="913" y="348" width="54" height="54" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="816" y="368" width="87" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Q_Prepare" bpmnElement="Q_Prepare">
+        <dc:Bounds x="1065" y="330" width="290" height="85" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_Fork" bpmnElement="Q_Fork">
-        <dc:Bounds x="1920" y="348" width="54" height="54" />
+        <dc:Bounds x="1483" y="344" width="54" height="54" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1983.5" y="361.5" width="75" height="27" />
+          <dc:Bounds x="1558" y="358" width="54" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_GHN" bpmnElement="Q_GHN">
-        <dc:Bounds x="2090" y="215" width="280" height="84" />
+        <dc:Bounds x="1587" y="197" width="280" height="84" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_GHNMap" bpmnElement="Q_GHNMap">
-        <dc:Bounds x="2440" y="215" width="285" height="86" />
+        <dc:Bounds x="1937" y="197" width="285" height="86" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_GHTKMap" bpmnElement="Q_GHTKMap">
-        <dc:Bounds x="2440" y="514" width="285" height="86" />
+        <dc:Bounds x="1937" y="496" width="285" height="86" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_Join" bpmnElement="Q_Join">
-        <dc:Bounds x="2800" y="348" width="54" height="54" />
+        <dc:Bounds x="2297" y="330" width="54" height="54" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2790" y="402" width="75" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Q_Notice" bpmnElement="Q_Notice">
-        <dc:Bounds x="3865" y="174" width="290" height="87" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Q_Validate" bpmnElement="Q_Validate">
-        <dc:Bounds x="1035" y="538" width="275" height="84" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Q_Invalid" bpmnElement="Q_Invalid">
-        <dc:Bounds x="374" y="196" width="295" height="88" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Q_Prepare" bpmnElement="Q_Prepare">
-        <dc:Bounds x="1565" y="334" width="290" height="85" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Q_Valid" bpmnElement="Q_Valid" isMarkerVisible="true">
-        <dc:Bounds x="1370" y="354" width="54" height="54" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1272.5" y="374" width="87" height="14" />
+          <dc:Bounds x="2211.5" y="343.5" width="75" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_GHTK" bpmnElement="Q_GHTK">
-        <dc:Bounds x="2090" y="519" width="280" height="84" />
+        <dc:Bounds x="1587" y="501" width="280" height="84" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Q_Notice" bpmnElement="Q_Notice">
+        <dc:Bounds x="3345" y="154" width="290" height="87" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_Filter" bpmnElement="Q_Filter">
-        <dc:Bounds x="2932" y="327" width="316" height="96" />
+        <dc:Bounds x="2412" y="307" width="316" height="96" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_Any" bpmnElement="Q_Any" isMarkerVisible="true">
-        <dc:Bounds x="3313" y="348" width="54" height="54" />
+        <dc:Bounds x="2793" y="328" width="54" height="54" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3376.5" y="368" width="81" height="14" />
+          <dc:Bounds x="2857" y="348" width="81" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_NoType" bpmnElement="Q_NoType" isMarkerVisible="true">
-        <dc:Bounds x="3443" y="645" width="54" height="54" />
+        <dc:Bounds x="2923" y="625" width="54" height="54" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3506.5" y="658.5" width="71" height="27" />
+          <dc:Bounds x="2987" y="639" width="71" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_NoService" bpmnElement="Q_NoService">
-        <dc:Bounds x="3605" y="535" width="290" height="89" />
+        <dc:Bounds x="3085" y="515" width="290" height="89" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_BothFail" bpmnElement="Q_BothFail">
-        <dc:Bounds x="3597" y="720" width="305" height="96" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Q_Partial" bpmnElement="Q_Partial" isMarkerVisible="true">
-        <dc:Bounds x="3523" y="348" width="54" height="54" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3431.5" y="361" width="81" height="27" />
-        </bpmndi:BPMNLabel>
+        <dc:Bounds x="3077" y="700" width="305" height="96" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_Display" bpmnElement="Q_Display">
-        <dc:Bounds x="3858" y="415" width="303" height="90" />
+        <dc:Bounds x="3338" y="395" width="303" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_EndNone" bpmnElement="Q_EndNone">
-        <dc:Bounds x="3991" y="568" width="38" height="38" />
+        <dc:Bounds x="3471" y="548" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3972" y="616" width="77" height="27" />
+          <dc:Bounds x="3448" y="596" width="85" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_EndError" bpmnElement="Q_EndError">
-        <dc:Bounds x="3991" y="749" width="38" height="38" />
+        <dc:Bounds x="3471" y="729" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3971" y="799" width="79" height="27" />
+          <dc:Bounds x="3452" y="779" width="78" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Q_Partial" bpmnElement="Q_Partial" isMarkerVisible="true">
+        <dc:Bounds x="3043" y="171" width="54" height="54" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3029" y="133.5" width="81" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_Select" bpmnElement="Q_Select">
-        <dc:Bounds x="4107" y="953" width="285" height="76" />
+        <dc:Bounds x="3607" y="962" width="285" height="76" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Q_EndOK" bpmnElement="Q_EndOK">
-        <dc:Bounds x="4451" y="968" width="38" height="38" />
+        <dc:Bounds x="3961" y="981" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="4429" y="1020" width="82" height="40" />
+          <dc:Bounds x="3940" y="1033" width="81" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_1" bpmnElement="Flow_WF01-quote_1">
         <di:waypoint x="278" y="987" />
-        <di:waypoint x="377" y="987" />
+        <di:waypoint x="325" y="987" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_6" bpmnElement="Flow_WF01-quote_6">
-        <di:waypoint x="522" y="284" />
-        <di:waypoint x="522" y="948" />
+        <di:waypoint x="470" y="284" />
+        <di:waypoint x="470" y="948" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="539" y="609" width="41" height="14" />
+          <dc:Bounds x="487" y="609" width="41" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_2" bpmnElement="Flow_WF01-quote_2">
-        <di:waypoint x="667" y="987" />
-        <di:waypoint x="750" y="988" />
+        <di:waypoint x="615" y="985" />
+        <di:waypoint x="670" y="985" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_3" bpmnElement="Flow_WF01-quote_3">
-        <di:waypoint x="970" y="988" />
-        <di:waypoint x="1002.5" y="988" />
-        <di:waypoint x="1002.5" y="580" />
-        <di:waypoint x="1035" y="580" />
+        <di:waypoint x="890" y="987" />
+        <di:waypoint x="940" y="987" />
+        <di:waypoint x="940" y="622" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_4" bpmnElement="Flow_WF01-quote_4">
-        <di:waypoint x="1310" y="580" />
-        <di:waypoint x="1397" y="580" />
-        <di:waypoint x="1397" y="408" />
+        <di:waypoint x="940" y="538" />
+        <di:waypoint x="940" y="402" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_5" bpmnElement="Flow_WF01-quote_5">
-        <di:waypoint x="1397" y="354" />
-        <di:waypoint x="1397" y="240" />
-        <di:waypoint x="669" y="240" />
+        <di:waypoint x="940" y="348" />
+        <di:waypoint x="940" y="240" />
+        <di:waypoint x="617" y="240" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1017" y="218" width="32" height="14" />
+          <dc:Bounds x="763" y="218" width="32" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_7" bpmnElement="Flow_WF01-quote_7">
-        <di:waypoint x="1423" y="380" />
-        <di:waypoint x="1495" y="380" />
-        <di:waypoint x="1495" y="381" />
-        <di:waypoint x="1565" y="381" />
+        <di:waypoint x="966" y="374" />
+        <di:waypoint x="1065" y="374" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1522" y="356" width="15" height="14" />
+          <dc:Bounds x="1009" y="349" width="15" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_8" bpmnElement="Flow_WF01-quote_8">
-        <di:waypoint x="1855" y="375" />
-        <di:waypoint x="1920" y="375" />
+        <di:waypoint x="1355" y="371" />
+        <di:waypoint x="1483" y="371" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_9" bpmnElement="Flow_WF01-quote_9">
-        <di:waypoint x="1947" y="348" />
-        <di:waypoint x="1947" y="257" />
-        <di:waypoint x="2090" y="257" />
+        <di:waypoint x="1510" y="344" />
+        <di:waypoint x="1510" y="239" />
+        <di:waypoint x="1587" y="239" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_10" bpmnElement="Flow_WF01-quote_10">
-        <di:waypoint x="1947" y="402" />
-        <di:waypoint x="1947" y="561" />
-        <di:waypoint x="2090" y="561" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_11" bpmnElement="Flow_WF01-quote_11">
-        <di:waypoint x="2370" y="257" />
-        <di:waypoint x="2440" y="258" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_12" bpmnElement="Flow_WF01-quote_12">
-        <di:waypoint x="2370" y="559" />
-        <di:waypoint x="2440" y="559" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_13" bpmnElement="Flow_WF01-quote_13">
-        <di:waypoint x="2725" y="258" />
-        <di:waypoint x="2762.5" y="258" />
-        <di:waypoint x="2762.5" y="375" />
-        <di:waypoint x="2800" y="375" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_14" bpmnElement="Flow_WF01-quote_14">
-        <di:waypoint x="2725" y="557" />
-        <di:waypoint x="2762.5" y="557" />
-        <di:waypoint x="2762.5" y="375" />
-        <di:waypoint x="2800" y="375" />
+        <di:waypoint x="1510" y="398" />
+        <di:waypoint x="1510" y="543" />
+        <di:waypoint x="1587" y="543" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_15" bpmnElement="Flow_WF01-quote_15">
-        <di:waypoint x="2853" y="374" />
-        <di:waypoint x="2932" y="374" />
+        <di:waypoint x="2350" y="356" />
+        <di:waypoint x="2412" y="356" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_16" bpmnElement="Flow_WF01-quote_16">
-        <di:waypoint x="3248" y="374" />
-        <di:waypoint x="3314" y="374" />
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_26" bpmnElement="Flow_WF01-quote_26">
+        <di:waypoint x="3641" y="440" />
+        <di:waypoint x="3750" y="440" />
+        <di:waypoint x="3750" y="962" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_17" bpmnElement="Flow_WF01-quote_17">
-        <di:waypoint x="3340" y="402" />
-        <di:waypoint x="3340" y="672" />
-        <di:waypoint x="3443" y="672" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3354" y="528" width="32" height="14" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_27" bpmnElement="Flow_WF01-quote_27">
+        <di:waypoint x="3892" y="999" />
+        <di:waypoint x="3960" y="1000" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_22" bpmnElement="Flow_WF01-quote_22">
-        <di:waypoint x="3340" y="348" />
-        <di:waypoint x="3340" y="290" />
-        <di:waypoint x="3550" y="290" />
-        <di:waypoint x="3550" y="348" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3439" y="265" width="15" height="14" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_11" bpmnElement="Flow_WF01-quote_11">
+        <di:waypoint x="1867" y="239" />
+        <di:waypoint x="1937" y="240" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_18" bpmnElement="Flow_WF01-quote_18">
-        <di:waypoint x="3470" y="645" />
-        <di:waypoint x="3470" y="580" />
-        <di:waypoint x="3605" y="580" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3498" y="589" width="90" height="14" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_13" bpmnElement="Flow_WF01-quote_13">
+        <di:waypoint x="2222" y="240" />
+        <di:waypoint x="2324" y="240" />
+        <di:waypoint x="2324" y="330" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_19" bpmnElement="Flow_WF01-quote_19">
-        <di:waypoint x="3470" y="699" />
-        <di:waypoint x="3470" y="768" />
-        <di:waypoint x="3597" y="768" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3522" y="746" width="15" height="14" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_12" bpmnElement="Flow_WF01-quote_12">
+        <di:waypoint x="1867" y="541" />
+        <di:waypoint x="1937" y="541" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_20" bpmnElement="Flow_WF01-quote_20">
-        <di:waypoint x="3895" y="587" />
-        <di:waypoint x="3991" y="587" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_21" bpmnElement="Flow_WF01-quote_21">
-        <di:waypoint x="3902" y="768" />
-        <di:waypoint x="3991" y="768" />
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_14" bpmnElement="Flow_WF01-quote_14">
+        <di:waypoint x="2222" y="539" />
+        <di:waypoint x="2324" y="539" />
+        <di:waypoint x="2324" y="384" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_23" bpmnElement="Flow_WF01-quote_23">
-        <di:waypoint x="3577" y="375" />
-        <di:waypoint x="3769.5" y="375" />
-        <di:waypoint x="3769.5" y="217.5" />
-        <di:waypoint x="3865" y="218" />
+        <di:waypoint x="3097" y="198" />
+        <di:waypoint x="3221" y="198" />
+        <di:waypoint x="3221" y="199" />
+        <di:waypoint x="3345" y="199" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3777" y="286" width="15" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_24" bpmnElement="Flow_WF01-quote_24">
-        <di:waypoint x="3550" y="402" />
-        <di:waypoint x="3550" y="462" />
-        <di:waypoint x="3858" y="462" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3552" y="425" width="32" height="14" />
+          <dc:Bounds x="3233" y="207" width="15" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_25" bpmnElement="Flow_WF01-quote_25">
-        <di:waypoint x="4010" y="261" />
-        <di:waypoint x="4010" y="415" />
+        <di:waypoint x="3490" y="241" />
+        <di:waypoint x="3490" y="395" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_26" bpmnElement="Flow_WF01-quote_26">
-        <di:waypoint x="4161" y="460" />
-        <di:waypoint x="4250" y="460" />
-        <di:waypoint x="4250" y="953" />
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_16" bpmnElement="Flow_WF01-quote_16">
+        <di:waypoint x="2728" y="354" />
+        <di:waypoint x="2794" y="354" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_27" bpmnElement="Flow_WF01-quote_27">
-        <di:waypoint x="4392" y="987" />
-        <di:waypoint x="4451" y="987" />
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_17" bpmnElement="Flow_WF01-quote_17">
+        <di:waypoint x="2820" y="382" />
+        <di:waypoint x="2820" y="652" />
+        <di:waypoint x="2923" y="652" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2834" y="508" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_22" bpmnElement="Flow_WF01-quote_22">
+        <di:waypoint x="2820" y="328" />
+        <di:waypoint x="2820" y="198" />
+        <di:waypoint x="3043" y="198" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2794" y="255" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_18" bpmnElement="Flow_WF01-quote_18">
+        <di:waypoint x="2950" y="625" />
+        <di:waypoint x="2950" y="560" />
+        <di:waypoint x="3085" y="560" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2978" y="569" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_19" bpmnElement="Flow_WF01-quote_19">
+        <di:waypoint x="2950" y="679" />
+        <di:waypoint x="2950" y="748" />
+        <di:waypoint x="3077" y="748" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3002" y="726" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_20" bpmnElement="Flow_WF01-quote_20">
+        <di:waypoint x="3375" y="567" />
+        <di:waypoint x="3471" y="567" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_21" bpmnElement="Flow_WF01-quote_21">
+        <di:waypoint x="3382" y="748" />
+        <di:waypoint x="3471" y="748" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_24" bpmnElement="Flow_WF01-quote_24">
+        <di:waypoint x="3070" y="225" />
+        <di:waypoint x="3070" y="442" />
+        <di:waypoint x="3338" y="442" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3084" y="327" width="32" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Participant_GHTK" bpmnElement="Participant_GHTK" isHorizontal="true">
-        <dc:Bounds x="1700" y="1230" width="520" height="78" />
+        <dc:Bounds x="1020" y="1210" width="520" height="78" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Participant_GHN" bpmnElement="Participant_GHN" isHorizontal="true">
-        <dc:Bounds x="2290" y="1230" width="520" height="78" />
+        <dc:Bounds x="1640" y="1210" width="520" height="78" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Msg_Q_GHN" bpmnElement="Msg_Q_GHN">
-        <di:waypoint x="2230" y="299" />
-        <di:waypoint x="2230" y="420" />
-        <di:waypoint x="2410" y="420" />
-        <di:waypoint x="2410" y="1230" />
+        <di:waypoint x="1727" y="281" />
+        <di:waypoint x="1727" y="380" />
+        <di:waypoint x="1900" y="380" />
+        <di:waypoint x="1900" y="1210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Msg_Q_GHTK" bpmnElement="Msg_Q_GHTK">
-        <di:waypoint x="2230" y="603" />
-        <di:waypoint x="2230" y="917" />
-        <di:waypoint x="1960" y="917" />
-        <di:waypoint x="1960" y="1230" />
+        <di:waypoint x="1727" y="585" />
+        <di:waypoint x="1727" y="740" />
+        <di:waypoint x="1280" y="740" />
+        <di:waypoint x="1280" y="1210" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

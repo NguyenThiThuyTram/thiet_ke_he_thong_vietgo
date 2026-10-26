@@ -4,18 +4,16 @@
     <bpmn:laneSet id="LaneSet_WF02-create-shipment">
       <bpmn:lane id="Lane_System_WF02-create-shipment" name="Hệ thống VietGo">
         <bpmn:flowNodeRef>S_Summary</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_CheckSafe</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_ReturnUC01</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_EndRerate</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_Check</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Valid</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Invalid</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_EndInvalid</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Key</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Dup</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_Status</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Prepare</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_Call</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_ReturnUC01</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_EndRerate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Check</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Status</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_DupState</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_DupOK</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_DupHold</bpmn:flowNodeRef>
@@ -23,86 +21,72 @@
         <bpmn:flowNodeRef>S_EndDupOK</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_EndDupFail</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_EndDupHold</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Call</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Result</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Reject</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Save</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Unknown</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_Reject</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_SaveOK</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_EndRejected</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Complete</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_SaveFail</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_EndSaveFail</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_EndSuccess</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_EndRejected</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Notify</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Reconcile</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_VResult</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Confirmed</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_EndConfirmed</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Manual</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_Retry</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_EndManual</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_CheckSafe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Retry</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_User_WF02-create-shipment" name="Người gửi hàng">
         <bpmn:flowNodeRef>S_Select</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Review</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Edit</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>S_Confirm</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>S_Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>S_Confirm</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:task id="S_Select" name="Chọn Rate hợp lệ">
       <bpmn:incoming>Flow_WF02-create-shipment_1</bpmn:incoming>
       <bpmn:outgoing>Flow_WF02-create-shipment_2</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="S_Summary" name="Hiển thị người gửi/nhận, kiện, COD, hãng, phí">
+    <bpmn:task id="S_Summary" name="Hiển thị thông tin vận đơn">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Hiển thị người gửi/nhận, kiện, COD, hãng, phí</bpmn:documentation>
       <bpmn:incoming>Flow_WF02-create-shipment_2</bpmn:incoming>
       <bpmn:outgoing>Flow_WF02-create-shipment_3</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="S_Review" name="Người gửi kiểm tra thông tin">
+    <bpmn:task id="S_Review" name="Kiểm tra thông tin vận đơn">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Người gửi kiểm tra thông tin</bpmn:documentation>
       <bpmn:incoming>Flow_WF02-create-shipment_3</bpmn:incoming>
       <bpmn:outgoing>Flow_WF02-create-shipment_4</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:exclusiveGateway id="S_Edit" name="Cần sửa thông tin?">
+    <bpmn:exclusiveGateway id="S_Edit" name="Cần sửa&#10;thông tin?">
       <bpmn:incoming>Flow_WF02-create-shipment_4</bpmn:incoming>
       <bpmn:outgoing>Flow_WF02-create-shipment_5</bpmn:outgoing>
       <bpmn:outgoing>Flow_WF02-create-shipment_7</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="S_Confirm" name="Nhấn “Xác nhận/Tạo vận đơn”">
-      <bpmn:incoming>Flow_WF02-create-shipment_7</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_8</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:exclusiveGateway id="S_CheckSafe" name="Xác nhận chưa tạo và retry an toàn?">
-      <bpmn:incoming>Flow_WF02-create-shipment_39</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_41</bpmn:outgoing>
-      <bpmn:outgoing>Flow_WF02-create-shipment_42</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:task id="S_ReturnUC01" name="Chỉnh sửa; lấy báo giá lại nếu ảnh hưởng phí / dịch vụ (A1)">
-      <bpmn:incoming>Flow_WF02-create-shipment_5</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_6</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:endEvent id="S_EndRerate" name="Kết thúc: trở lại UC-01">
-      <bpmn:incoming>Flow_WF02-create-shipment_6</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:startEvent id="S_Start" name="Bắt đầu: Rate từ UC-01">
+    <bpmn:startEvent id="S_Start" name="Nhận Rate từ UC-01">
       <bpmn:outgoing>Flow_WF02-create-shipment_1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="S_Check" name="Kiểm tra đăng nhập, quyền, dữ liệu, hiệu lực Rate">
-      <bpmn:incoming>Flow_WF02-create-shipment_8</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_9</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:exclusiveGateway id="S_Valid" name="Đủ điều kiện?">
       <bpmn:incoming>Flow_WF02-create-shipment_9</bpmn:incoming>
       <bpmn:outgoing>Flow_WF02-create-shipment_10</bpmn:outgoing>
       <bpmn:outgoing>Flow_WF02-create-shipment_12</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="S_Invalid" name="Yêu cầu sửa / chọn Rate khác (A2)">
+    <bpmn:task id="S_Invalid" name="Yêu cầu sửa hoặc chọn Rate khác">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Yêu cầu sửa / chọn Rate khác (A2)</bpmn:documentation>
       <bpmn:incoming>Flow_WF02-create-shipment_10</bpmn:incoming>
       <bpmn:outgoing>Flow_WF02-create-shipment_11</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:endEvent id="S_EndInvalid" name="Kết thúc: chưa gửi booking">
+    <bpmn:endEvent id="S_EndInvalid" name="Chưa đủ điều kiện tạo đơn">
       <bpmn:incoming>Flow_WF02-create-shipment_11</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:task id="S_Key" name="Tìm hoặc tạo booking_key duy nhất, bất biến">
+    <bpmn:task id="S_Key" name="Xác lập booking_key">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Tìm hoặc tạo booking_key duy nhất, bất biến</bpmn:documentation>
       <bpmn:incoming>Flow_WF02-create-shipment_12</bpmn:incoming>
       <bpmn:outgoing>Flow_WF02-create-shipment_13</bpmn:outgoing>
     </bpmn:task>
@@ -111,119 +95,11 @@
       <bpmn:outgoing>Flow_WF02-create-shipment_14</bpmn:outgoing>
       <bpmn:outgoing>Flow_WF02-create-shipment_22</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:task id="S_Status" name="Kiểm tra booking_status đã lưu">
-      <bpmn:incoming>Flow_WF02-create-shipment_14</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_15</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="S_Prepare" name="Lưu PENDING và booking_attempts (cùng booking_key)">
+    <bpmn:task id="S_Prepare" name="Lưu yêu cầu PENDING">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Lưu PENDING và booking_attempts (cùng booking_key)</bpmn:documentation>
       <bpmn:incoming>Flow_WF02-create-shipment_22</bpmn:incoming>
       <bpmn:outgoing>Flow_WF02-create-shipment_23</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="S_Call" name="Backend gửi booking đến đúng hãng đã chọn (≤10 giây)">
-      <bpmn:incoming>Flow_WF02-create-shipment_23</bpmn:incoming>
-      <bpmn:incoming>Flow_WF02-create-shipment_43</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_24</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:exclusiveGateway id="S_DupState" name="booking_status?">
-      <bpmn:incoming>Flow_WF02-create-shipment_15</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_16</bpmn:outgoing>
-      <bpmn:outgoing>Flow_WF02-create-shipment_17</bpmn:outgoing>
-      <bpmn:outgoing>Flow_WF02-create-shipment_18</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:task id="S_DupOK" name="SUCCESS: trả lại vận đơn đã lưu">
-      <bpmn:incoming>Flow_WF02-create-shipment_16</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_19</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="S_DupHold" name="PENDING/UNKNOWN: báo đang xử lý/xác minh">
-      <bpmn:incoming>Flow_WF02-create-shipment_17</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_20</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="S_DupFail" name="FAILED: hiển thị kết quả từ chối; không tự gửi lại">
-      <bpmn:incoming>Flow_WF02-create-shipment_18</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_21</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:endEvent id="S_EndDupOK" name="Kết thúc: kết quả đã có">
-      <bpmn:incoming>Flow_WF02-create-shipment_19</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:endEvent id="S_EndDupFail" name="Kết thúc: FAILED đã lưu">
-      <bpmn:incoming>Flow_WF02-create-shipment_21</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:endEvent id="S_EndDupHold" name="Kết thúc: không tạo đơn trùng">
-      <bpmn:incoming>Flow_WF02-create-shipment_20</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:exclusiveGateway id="S_Result" name="Kết quả từ carrier?">
-      <bpmn:incoming>Flow_WF02-create-shipment_24</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_25</bpmn:outgoing>
-      <bpmn:outgoing>Flow_WF02-create-shipment_31</bpmn:outgoing>
-      <bpmn:outgoing>Flow_WF02-create-shipment_33</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:task id="S_Save" name="Có xác nhận tạo: lưu Shipment, mã VietGo / hãng, phí, COD">
-      <bpmn:incoming>Flow_WF02-create-shipment_25</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_26</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="S_Unknown" name="Timeout / phản hồi chưa rõ: đặt UNKNOWN; giữ key và attempts (E2/E3)">
-      <bpmn:incoming>Flow_WF02-create-shipment_33</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_34</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="S_Reject" name="Carrier từ chối: đặt FAILED; thông báo lý do (E1)">
-      <bpmn:incoming>Flow_WF02-create-shipment_31</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_32</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:exclusiveGateway id="S_SaveOK" name="Lưu an toàn thành công?">
-      <bpmn:incoming>Flow_WF02-create-shipment_26</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_27</bpmn:outgoing>
-      <bpmn:outgoing>Flow_WF02-create-shipment_29</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:endEvent id="S_EndRejected" name="Kết thúc: carrier từ chối">
-      <bpmn:incoming>Flow_WF02-create-shipment_32</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:task id="S_Complete" name="Đặt SUCCESS; hiển thị mã / chi tiết đã xác nhận (A3)">
-      <bpmn:incoming>Flow_WF02-create-shipment_27</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_28</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="S_SaveFail" name="Lỗi lưu / thiếu căn cứ: lưu dấu vết; không báo hoàn tất (E3)">
-      <bpmn:incoming>Flow_WF02-create-shipment_29</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_30</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:endEvent id="S_EndSaveFail" name="Kết thúc: cần khôi phục an toàn">
-      <bpmn:incoming>Flow_WF02-create-shipment_30</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:endEvent id="S_EndSuccess" name="Kết thúc: tạo đơn thành công">
-      <bpmn:incoming>Flow_WF02-create-shipment_28</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:task id="S_Notify" name="Thông báo “Đang xác minh kết quả tạo vận đơn”">
-      <bpmn:incoming>Flow_WF02-create-shipment_34</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_35</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="S_Reconcile" name="Truy vấn / đối chiếu kết quả carrier bằng mã tham chiếu nếu hỗ trợ">
-      <bpmn:incoming>Flow_WF02-create-shipment_35</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_36</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:exclusiveGateway id="S_VResult" name="Kết quả xác minh?">
-      <bpmn:incoming>Flow_WF02-create-shipment_36</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_37</bpmn:outgoing>
-      <bpmn:outgoing>Flow_WF02-create-shipment_39</bpmn:outgoing>
-      <bpmn:outgoing>Flow_WF02-create-shipment_40</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:task id="S_Confirmed" name="Carrier xác nhận đã tạo: lưu Shipment; SUCCESS; không retry">
-      <bpmn:incoming>Flow_WF02-create-shipment_37</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_38</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:endEvent id="S_EndConfirmed" name="Kết thúc: đã xác minh tạo thành công">
-      <bpmn:incoming>Flow_WF02-create-shipment_38</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:task id="S_Manual" name="Không thể xác minh / retry không an toàn: giữ UNKNOWN, xử lý thủ công">
-      <bpmn:incoming>Flow_WF02-create-shipment_40</bpmn:incoming>
-      <bpmn:incoming>Flow_WF02-create-shipment_42</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_44</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:task id="S_Retry" name="Retry có kiểm soát, sử dụng lại booking_key">
-      <bpmn:incoming>Flow_WF02-create-shipment_41</bpmn:incoming>
-      <bpmn:outgoing>Flow_WF02-create-shipment_43</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:endEvent id="S_EndManual" name="Kết thúc: UNKNOWN">
-      <bpmn:incoming>Flow_WF02-create-shipment_44</bpmn:incoming>
-    </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_1" sourceRef="S_Start" targetRef="S_Select" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_2" sourceRef="S_Select" targetRef="S_Summary" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_3" sourceRef="S_Summary" targetRef="S_Review" />
@@ -231,9 +107,7 @@
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_5" name="Có" sourceRef="S_Edit" targetRef="S_ReturnUC01" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_7" name="Không" sourceRef="S_Edit" targetRef="S_Confirm" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_8" sourceRef="S_Confirm" targetRef="S_Check" />
-    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_39" name="Chưa tạo" sourceRef="S_VResult" targetRef="S_CheckSafe" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_41" name="Có; hãng bảo đảm" sourceRef="S_CheckSafe" targetRef="S_Retry" />
-    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_42" name="Không" sourceRef="S_CheckSafe" targetRef="S_Manual" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_6" sourceRef="S_ReturnUC01" targetRef="S_EndRerate" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_9" sourceRef="S_Check" targetRef="S_Valid" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_10" name="Không" sourceRef="S_Valid" targetRef="S_Invalid" />
@@ -249,25 +123,174 @@
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_16" name="SUCCESS" sourceRef="S_DupState" targetRef="S_DupOK" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_17" name="PENDING/UNKNOWN" sourceRef="S_DupState" targetRef="S_DupHold" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_18" name="FAILED" sourceRef="S_DupState" targetRef="S_DupFail" />
-    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_19" sourceRef="S_DupOK" targetRef="S_EndDupOK" />
-    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_20" sourceRef="S_DupHold" targetRef="S_EndDupHold" />
-    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_21" sourceRef="S_DupFail" targetRef="S_EndDupFail" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_25" name="Thành công" sourceRef="S_Result" targetRef="S_Save" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_31" name="Từ chối" sourceRef="S_Result" targetRef="S_Reject" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_33" name="Timeout / chưa rõ" sourceRef="S_Result" targetRef="S_Unknown" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_26" sourceRef="S_Save" targetRef="S_SaveOK" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_34" sourceRef="S_Unknown" targetRef="S_Notify" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_32" sourceRef="S_Reject" targetRef="S_EndRejected" />
+    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_37" name="Đã tạo" sourceRef="S_VResult" targetRef="S_Confirmed" />
+    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_38" sourceRef="S_Confirmed" targetRef="S_EndConfirmed" />
+    <bpmn:task id="S_ReturnUC01" name="Chỉnh sửa và báo giá lại">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Chỉnh sửa; lấy báo giá lại nếu ảnh hưởng phí / dịch vụ (A1)</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="S_Confirm" name="Xác nhận tạo vận đơn">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Nhấn “Xác nhận/Tạo vận đơn”</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="S_EndRerate" name="Quay lại UC-01 để báo giá">
+      <bpmn:incoming>Flow_WF02-create-shipment_6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="S_Check" name="Kiểm tra điều kiện tạo đơn">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Kiểm tra đăng nhập, quyền, dữ liệu, hiệu lực Rate</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_9</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="S_Status" name="Kiểm tra trạng thái booking">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Kiểm tra booking_status đã lưu</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_14</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_15</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="S_DupState" name="booking_status?">
+      <bpmn:incoming>Flow_WF02-create-shipment_15</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_16</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WF02-create-shipment_17</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WF02-create-shipment_18</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="S_DupOK" name="Trả lại vận đơn đã lưu">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): SUCCESS: trả lại vận đơn đã lưu</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_16</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_19</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="S_DupHold" name="Thông báo yêu cầu đang xử lý">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): PENDING/UNKNOWN: báo đang xử lý/xác minh</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_17</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_20</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="S_DupFail" name="Thông báo yêu cầu đã thất bại">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): FAILED: hiển thị kết quả từ chối; không tự gửi lại</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_18</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_21</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="S_EndDupOK" name="Vận đơn đã tồn tại">
+      <bpmn:incoming>Flow_WF02-create-shipment_19</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="S_EndDupFail" name="Yêu cầu trước đã thất bại">
+      <bpmn:incoming>Flow_WF02-create-shipment_21</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="S_EndDupHold" name="Yêu cầu đang được xử lý">
+      <bpmn:incoming>Flow_WF02-create-shipment_20</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_19" sourceRef="S_DupOK" targetRef="S_EndDupOK" />
+    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_20" sourceRef="S_DupHold" targetRef="S_EndDupHold" />
+    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_21" sourceRef="S_DupFail" targetRef="S_EndDupFail" />
+    <bpmn:task id="S_Call" name="Gửi yêu cầu tạo vận đơn">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Backend gửi booking đến đúng hãng đã chọn (≤10 giây)</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_23</bpmn:incoming>
+      <bpmn:incoming>Flow_WF02-create-shipment_43</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_24</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="S_Result" name="Kết quả từ carrier?">
+      <bpmn:incoming>Flow_WF02-create-shipment_24</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_25</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WF02-create-shipment_31</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WF02-create-shipment_33</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="S_Reject" name="Ghi nhận hãng từ chối">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Carrier từ chối: đặt FAILED; thông báo lý do (E1)</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_31</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_32</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="S_Save" name="Lưu thông tin vận đơn">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Có xác nhận tạo: lưu Shipment, mã VietGo / hãng, phí, COD</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_25</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_26</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="S_Unknown" name="Ghi nhận trạng thái UNKNOWN">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Timeout / phản hồi chưa rõ: đặt UNKNOWN; giữ key và attempts (E2/E3)</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_33</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_34</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="S_SaveOK" name="Lưu an toàn thành công?">
+      <bpmn:incoming>Flow_WF02-create-shipment_26</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_27</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WF02-create-shipment_29</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="S_Complete" name="Hoàn tất tạo vận đơn">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Đặt SUCCESS; hiển thị mã / chi tiết đã xác nhận (A3)</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_27</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_28</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="S_SaveFail" name="Ghi nhận lỗi lưu vận đơn">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Lỗi lưu / thiếu căn cứ: lưu dấu vết; không báo hoàn tất (E3)</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_29</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_30</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="S_EndSaveFail" name="Cần khôi phục dữ liệu">
+      <bpmn:incoming>Flow_WF02-create-shipment_30</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="S_EndSuccess" name="Vận đơn được tạo thành công">
+      <bpmn:incoming>Flow_WF02-create-shipment_28</bpmn:incoming>
+    </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_27" name="Có" sourceRef="S_SaveOK" targetRef="S_Complete" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_29" name="Không" sourceRef="S_SaveOK" targetRef="S_SaveFail" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_28" sourceRef="S_Complete" targetRef="S_EndSuccess" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_30" sourceRef="S_SaveFail" targetRef="S_EndSaveFail" />
+    <bpmn:endEvent id="S_EndRejected" name="Hãng vận chuyển từ chối">
+      <bpmn:incoming>Flow_WF02-create-shipment_32</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="S_Notify" name="Thông báo đang xác minh">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Thông báo “Đang xác minh kết quả tạo vận đơn”</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_34</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_35</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="S_Reconcile" name="Đối chiếu kết quả với hãng">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Truy vấn / đối chiếu kết quả carrier bằng mã tham chiếu nếu hỗ trợ</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_35</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_36</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="S_VResult" name="Kết quả xác minh?">
+      <bpmn:incoming>Flow_WF02-create-shipment_36</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_37</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WF02-create-shipment_39</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WF02-create-shipment_40</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_39" name="Chưa tạo" sourceRef="S_VResult" targetRef="S_CheckSafe" />
+    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_42" name="Không" sourceRef="S_CheckSafe" targetRef="S_Manual" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_35" sourceRef="S_Notify" targetRef="S_Reconcile" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_36" sourceRef="S_Reconcile" targetRef="S_VResult" />
-    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_37" name="Đã tạo" sourceRef="S_VResult" targetRef="S_Confirmed" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_40" name="Không xác minh được" sourceRef="S_VResult" targetRef="S_Manual" />
-    <bpmn:sequenceFlow id="Flow_WF02-create-shipment_38" sourceRef="S_Confirmed" targetRef="S_EndConfirmed" />
     <bpmn:sequenceFlow id="Flow_WF02-create-shipment_44" sourceRef="S_Manual" targetRef="S_EndManual" />
+    <bpmn:task id="S_Confirmed" name="Lưu vận đơn đã xác minh">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Carrier xác nhận đã tạo: lưu Shipment; SUCCESS; không retry</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_37</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_38</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="S_EndConfirmed" name="Đã xác minh tạo vận đơn">
+      <bpmn:incoming>Flow_WF02-create-shipment_38</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="S_Manual" name="Chuyển xử lý thủ công">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Không thể xác minh / retry không an toàn: giữ UNKNOWN, xử lý thủ công</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_40</bpmn:incoming>
+      <bpmn:incoming>Flow_WF02-create-shipment_42</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_44</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="S_EndManual" name="Chờ xác minh&#10;thủ công">
+      <bpmn:incoming>Flow_WF02-create-shipment_44</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="S_CheckSafe" name="Xác nhận chưa tạo và retry&#10;an toàn?">
+      <bpmn:incoming>Flow_WF02-create-shipment_39</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_41</bpmn:outgoing>
+      <bpmn:outgoing>Flow_WF02-create-shipment_42</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="S_Retry" name="Thử lại với booking_key cũ">
+      <bpmn:documentation>Chi tiết nghiệp vụ (tên gốc): Retry có kiểm soát, sử dụng lại booking_key</bpmn:documentation>
+      <bpmn:incoming>Flow_WF02-create-shipment_41</bpmn:incoming>
+      <bpmn:outgoing>Flow_WF02-create-shipment_43</bpmn:outgoing>
+    </bpmn:task>
   </bpmn:process>
   <bpmn:collaboration id="Collab_WF02-create-shipment">
     <bpmn:participant id="Participant_Main_WF02-create-shipment" name="VIETGO | CHỌN DỊCH VỤ VÀ TẠO VẬN ĐƠN" processRef="Process_WF02-create-shipment" />
@@ -277,13 +300,13 @@
   <bpmndi:BPMNDiagram id="Diagram_WF02-create-shipment">
     <bpmndi:BPMNPlane id="Plane_WF02-create-shipment" bpmnElement="Collab_WF02-create-shipment">
       <bpmndi:BPMNShape id="Shape_Participant_Main_WF02-create-shipment" bpmnElement="Participant_Main_WF02-create-shipment" isHorizontal="true">
-        <dc:Bounds x="160" y="40" width="6910" height="1320" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Lane_System_WF02-create-shipment" bpmnElement="Lane_System_WF02-create-shipment" isHorizontal="true">
-        <dc:Bounds x="192" y="40" width="6878" height="1140" />
+        <dc:Bounds x="160" y="40" width="5570" height="1320" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Lane_User_WF02-create-shipment" bpmnElement="Lane_User_WF02-create-shipment" isHorizontal="true">
-        <dc:Bounds x="192" y="1180" width="6878" height="180" />
+        <dc:Bounds x="192" y="1180" width="5538" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_System_WF02-create-shipment" bpmnElement="Lane_System_WF02-create-shipment" isHorizontal="true">
+        <dc:Bounds x="192" y="40" width="5538" height="1140" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Select" bpmnElement="S_Select">
         <dc:Bounds x="375" y="1220" width="255" height="76" />
@@ -297,35 +320,14 @@
       <bpmndi:BPMNShape id="Shape_S_Edit" bpmnElement="S_Edit" isMarkerVisible="true">
         <dc:Bounds x="1360" y="1230" width="56" height="56" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1352" y="1286" width="73" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_Confirm" bpmnElement="S_Confirm">
-        <dc:Bounds x="1570" y="1220" width="280" height="79" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_CheckSafe" bpmnElement="S_CheckSafe" isMarkerVisible="true">
-        <dc:Bounds x="5960" y="942" width="54" height="54" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="5950" y="996" width="75" height="40" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_ReturnUC01" bpmnElement="S_ReturnUC01">
-        <dc:Bounds x="1557" y="984" width="305" height="88" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_EndRerate" bpmnElement="S_EndRerate">
-        <dc:Bounds x="1901" y="1009" width="38" height="38" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1883" y="1066" width="75" height="27" />
+          <dc:Bounds x="1364" y="1296" width="49" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Start" bpmnElement="S_Start">
         <dc:Bounds x="250" y="1239" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="229" y="1277" width="81" height="27" />
+          <dc:Bounds x="225" y="1286" width="89" height="27" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_Check" bpmnElement="S_Check">
-        <dc:Bounds x="1842" y="491" width="325" height="88" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Valid" bpmnElement="S_Valid" isMarkerVisible="true">
         <dc:Bounds x="2237" y="503" width="54" height="54" />
@@ -351,126 +353,147 @@
           <dc:Bounds x="2937" y="524.5" width="78" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_Status" bpmnElement="S_Status">
-        <dc:Bounds x="3035" y="160" width="310" height="84" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Prepare" bpmnElement="S_Prepare">
         <dc:Bounds x="3035" y="577" width="310" height="85" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_Call" bpmnElement="S_Call">
-        <dc:Bounds x="3457" y="576" width="326" height="88" />
+      <bpmndi:BPMNShape id="Shape_S_ReturnUC01" bpmnElement="S_ReturnUC01">
+        <dc:Bounds x="1457" y="984" width="305" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Confirm" bpmnElement="S_Confirm">
+        <dc:Bounds x="1470" y="1218" width="280" height="79" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_EndRerate" bpmnElement="S_EndRerate">
+        <dc:Bounds x="1801" y="1009" width="38" height="38" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1783" y="1066" width="76" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Check" bpmnElement="S_Check">
+        <dc:Bounds x="1747" y="491" width="325" height="88" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Status" bpmnElement="S_Status">
+        <dc:Bounds x="3015" y="221" width="310" height="84" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_DupState" bpmnElement="S_DupState" isMarkerVisible="true">
-        <dc:Bounds x="3400" y="175" width="56" height="56" />
+        <dc:Bounds x="3400" y="235" width="56" height="56" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3438.5" y="173" width="81" height="14" />
+          <dc:Bounds x="3439" y="233" width="81" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_DupOK" bpmnElement="S_DupOK">
-        <dc:Bounds x="3692" y="95" width="295" height="81" />
+        <dc:Bounds x="3622" y="95" width="295" height="81" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_DupHold" bpmnElement="S_DupHold">
-        <dc:Bounds x="3690" y="219" width="300" height="88" />
+        <dc:Bounds x="3620" y="219" width="300" height="88" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_DupFail" bpmnElement="S_DupFail">
-        <dc:Bounds x="3690" y="334" width="300" height="90" />
+        <dc:Bounds x="3620" y="334" width="300" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_EndDupOK" bpmnElement="S_EndDupOK">
-        <dc:Bounds x="4061" y="117" width="38" height="38" />
+        <dc:Bounds x="3991" y="117" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="4039" y="166" width="83" height="27" />
+          <dc:Bounds x="3973" y="166" width="76" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_EndDupFail" bpmnElement="S_EndDupFail">
-        <dc:Bounds x="4061" y="360" width="38" height="38" />
+        <dc:Bounds x="3991" y="360" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="4038" y="406" width="85" height="27" />
+          <dc:Bounds x="3968" y="406" width="86" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_EndDupHold" bpmnElement="S_EndDupHold">
-        <dc:Bounds x="4061" y="240" width="38" height="38" />
+        <dc:Bounds x="3991" y="240" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="4042" y="286" width="77" height="27" />
+          <dc:Bounds x="3977" y="286" width="68" height="27" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Call" bpmnElement="S_Call">
+        <dc:Bounds x="3407" y="576" width="326" height="88" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Result" bpmnElement="S_Result" isMarkerVisible="true">
-        <dc:Bounds x="3893" y="593" width="54" height="54" />
+        <dc:Bounds x="3813" y="658" width="54" height="54" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3894" y="657" width="52" height="27" />
+          <dc:Bounds x="3764" y="706" width="52" height="27" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_Save" bpmnElement="S_Save">
-        <dc:Bounds x="4137" y="454" width="325" height="96" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_Unknown" bpmnElement="S_Unknown">
-        <dc:Bounds x="4140" y="796" width="360" height="97" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Reject" bpmnElement="S_Reject">
-        <dc:Bounds x="4131" y="636" width="318" height="98" />
+        <dc:Bounds x="4001" y="636" width="318" height="98" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Save" bpmnElement="S_Save">
+        <dc:Bounds x="3997" y="454" width="325" height="96" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Unknown" bpmnElement="S_Unknown">
+        <dc:Bounds x="3990" y="796" width="360" height="97" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_SaveOK" bpmnElement="S_SaveOK" isMarkerVisible="true">
-        <dc:Bounds x="4607" y="477" width="54" height="54" />
+        <dc:Bounds x="4375" y="477" width="54" height="54" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="4604" y="531" width="61" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_EndRejected" bpmnElement="S_EndRejected">
-        <dc:Bounds x="4615" y="666" width="38" height="38" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="4595" y="716" width="78" height="27" />
+          <dc:Bounds x="4372" y="531" width="61" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Complete" bpmnElement="S_Complete">
-        <dc:Bounds x="4805" y="144" width="334" height="92" />
+        <dc:Bounds x="4573" y="144" width="334" height="92" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_SaveFail" bpmnElement="S_SaveFail">
-        <dc:Bounds x="4810" y="309" width="338" height="92" />
+        <dc:Bounds x="4578" y="309" width="338" height="92" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_EndSaveFail" bpmnElement="S_EndSaveFail">
-        <dc:Bounds x="5220" y="336" width="38" height="38" />
+        <dc:Bounds x="4988" y="336" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="5195" y="392" width="88" height="27" />
+          <dc:Bounds x="4964" y="392" width="87" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_EndSuccess" bpmnElement="S_EndSuccess">
-        <dc:Bounds x="5220" y="183" width="38" height="38" />
+        <dc:Bounds x="4988" y="183" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="5197" y="228" width="85" height="27" />
+          <dc:Bounds x="4963" y="228" width="90" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_EndRejected" bpmnElement="S_EndRejected">
+        <dc:Bounds x="4468" y="666" width="38" height="38" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4444" y="716" width="86" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Notify" bpmnElement="S_Notify">
-        <dc:Bounds x="4584" y="801" width="352" height="88" />
+        <dc:Bounds x="4437" y="801" width="352" height="88" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Reconcile" bpmnElement="S_Reconcile">
-        <dc:Bounds x="5041" y="792" width="357" height="105" />
+        <dc:Bounds x="4894" y="792" width="357" height="105" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_VResult" bpmnElement="S_VResult" isMarkerVisible="true">
-        <dc:Bounds x="5453" y="818" width="54" height="54" />
+        <dc:Bounds x="5306" y="818" width="54" height="54" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="5490" y="872" width="59" height="27" />
+          <dc:Bounds x="5343" y="872" width="59" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Confirmed" bpmnElement="S_Confirmed">
-        <dc:Bounds x="5314" y="480" width="332" height="100" />
+        <dc:Bounds x="4904" y="580" width="332" height="100" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_EndConfirmed" bpmnElement="S_EndConfirmed">
-        <dc:Bounds x="5741" y="516" width="38" height="38" />
+        <dc:Bounds x="5051" y="451" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="5721" y="554" width="79" height="40" />
+          <dc:Bounds x="5030" y="413.5" width="80" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_Manual" bpmnElement="S_Manual">
-        <dc:Bounds x="5810" y="611" width="354" height="98" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_S_Retry" bpmnElement="S_Retry">
-        <dc:Bounds x="6282" y="921" width="295" height="96" />
+        <dc:Bounds x="5316" y="431" width="354" height="98" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_S_EndManual" bpmnElement="S_EndManual">
-        <dc:Bounds x="6261" y="632" width="38" height="38" />
+        <dc:Bounds x="5474" y="301" width="38" height="38" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="6251" y="686" width="59" height="27" />
+          <dc:Bounds x="5458" y="263.5" width="69" height="27" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_CheckSafe" bpmnElement="S_CheckSafe" isMarkerVisible="true">
+        <dc:Bounds x="5563" y="942" width="54" height="54" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5626.5" y="949" width="75" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_S_Retry" bpmnElement="S_Retry">
+        <dc:Bounds x="4925" y="1062" width="295" height="96" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_1" bpmnElement="Flow_WF02-create-shipment_1">
         <di:waypoint x="288" y="1258" />
@@ -495,176 +518,38 @@
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_5" bpmnElement="Flow_WF02-create-shipment_5">
         <di:waypoint x="1388" y="1230" />
         <di:waypoint x="1388" y="1028" />
-        <di:waypoint x="1557" y="1028" />
+        <di:waypoint x="1457" y="1028" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1396" y="1119" width="15" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_6" bpmnElement="Flow_WF02-create-shipment_6">
-        <di:waypoint x="1862" y="1028" />
-        <di:waypoint x="1901" y="1028" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_7" bpmnElement="Flow_WF02-create-shipment_7">
         <di:waypoint x="1416" y="1258" />
-        <di:waypoint x="1570" y="1259.5" />
+        <di:waypoint x="1470" y="1258" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1477" y="1234" width="32" height="14" />
+          <dc:Bounds x="1426" y="1233" width="32" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_8" bpmnElement="Flow_WF02-create-shipment_8">
-        <di:waypoint x="1850" y="1260" />
-        <di:waypoint x="2005" y="1259.5" />
-        <di:waypoint x="2005" y="579" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_9" bpmnElement="Flow_WF02-create-shipment_9">
-        <di:waypoint x="2167" y="530" />
-        <di:waypoint x="2237" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_14" bpmnElement="Flow_WF02-create-shipment_14">
-        <di:waypoint x="2900" y="511" />
-        <di:waypoint x="2900" y="202" />
-        <di:waypoint x="3035" y="202" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2908" y="348" width="15" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_15" bpmnElement="Flow_WF02-create-shipment_15">
-        <di:waypoint x="3345" y="203" />
-        <di:waypoint x="3400" y="203" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_22" bpmnElement="Flow_WF02-create-shipment_22">
-        <di:waypoint x="2900" y="565" />
-        <di:waypoint x="2900" y="620" />
-        <di:waypoint x="3035" y="620" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2914" y="586" width="32" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_23" bpmnElement="Flow_WF02-create-shipment_23">
-        <di:waypoint x="3345" y="621" />
-        <di:waypoint x="3457" y="621" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_24" bpmnElement="Flow_WF02-create-shipment_24">
-        <di:waypoint x="3783" y="621" />
-        <di:waypoint x="3838" y="621" />
-        <di:waypoint x="3838" y="620" />
-        <di:waypoint x="3893" y="620" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_25" bpmnElement="Flow_WF02-create-shipment_25">
-        <di:waypoint x="3920" y="593" />
-        <di:waypoint x="3920" y="502" />
-        <di:waypoint x="4137" y="502" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3920" y="508" width="59" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_26" bpmnElement="Flow_WF02-create-shipment_26">
-        <di:waypoint x="4462" y="504" />
-        <di:waypoint x="4607" y="504" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_27" bpmnElement="Flow_WF02-create-shipment_27">
-        <di:waypoint x="4634" y="477" />
-        <di:waypoint x="4634" y="190" />
-        <di:waypoint x="4805" y="190" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="4602" y="333" width="15" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_29" bpmnElement="Flow_WF02-create-shipment_29">
-        <di:waypoint x="4661" y="504" />
-        <di:waypoint x="4979" y="504" />
-        <di:waypoint x="4979" y="401" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="4744" y="508" width="32" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_31" bpmnElement="Flow_WF02-create-shipment_31">
-        <di:waypoint x="3947" y="620" />
-        <di:waypoint x="4090" y="620" />
-        <di:waypoint x="4090" y="685" />
-        <di:waypoint x="4131" y="685" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3967" y="593" width="38" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_32" bpmnElement="Flow_WF02-create-shipment_32">
-        <di:waypoint x="4449" y="684" />
-        <di:waypoint x="4615" y="684" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_33" bpmnElement="Flow_WF02-create-shipment_33">
-        <di:waypoint x="3920" y="647" />
-        <di:waypoint x="3920" y="845" />
-        <di:waypoint x="4140" y="845" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3984" y="823" width="87" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_34" bpmnElement="Flow_WF02-create-shipment_34">
-        <di:waypoint x="4500" y="844" />
-        <di:waypoint x="4584" y="844" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_35" bpmnElement="Flow_WF02-create-shipment_35">
-        <di:waypoint x="4936" y="851" />
-        <di:waypoint x="5041" y="851" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_36" bpmnElement="Flow_WF02-create-shipment_36">
-        <di:waypoint x="5398" y="845" />
-        <di:waypoint x="5450" y="845" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_37" bpmnElement="Flow_WF02-create-shipment_37">
-        <di:waypoint x="5480" y="818" />
-        <di:waypoint x="5480" y="580" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="5493" y="685" width="33" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_38" bpmnElement="Flow_WF02-create-shipment_38">
-        <di:waypoint x="5646" y="534" />
-        <di:waypoint x="5741" y="534" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_39" bpmnElement="Flow_WF02-create-shipment_39">
-        <di:waypoint x="5480" y="872" />
-        <di:waypoint x="5480" y="969" />
-        <di:waypoint x="5960" y="969" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="5507" y="943" width="46" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_40" bpmnElement="Flow_WF02-create-shipment_40">
-        <di:waypoint x="5507" y="845" />
-        <di:waypoint x="5640" y="845" />
-        <di:waypoint x="5640" y="660" />
-        <di:waypoint x="5810" y="660" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="5560" y="736" width="79" height="27" />
-        </bpmndi:BPMNLabel>
+        <di:waypoint x="1750" y="1258" />
+        <di:waypoint x="1910" y="1258" />
+        <di:waypoint x="1910" y="579" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_41" bpmnElement="Flow_WF02-create-shipment_41">
-        <di:waypoint x="6014" y="969" />
-        <di:waypoint x="6282" y="969" />
+        <di:waypoint x="5590" y="996" />
+        <di:waypoint x="5590" y="1110" />
+        <di:waypoint x="5220" y="1110" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="6026" y="936" width="67" height="27" />
+          <dc:Bounds x="5516" y="1036" width="67" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_42" bpmnElement="Flow_WF02-create-shipment_42">
-        <di:waypoint x="5987" y="942" />
-        <di:waypoint x="5987" y="709" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="5944" y="893" width="32" height="14" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_6" bpmnElement="Flow_WF02-create-shipment_6">
+        <di:waypoint x="1762" y="1028" />
+        <di:waypoint x="1801" y="1028" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_43" bpmnElement="Flow_WF02-create-shipment_43">
-        <di:waypoint x="6430" y="1017" />
-        <di:waypoint x="6430" y="1130" />
-        <di:waypoint x="3620" y="1130" />
-        <di:waypoint x="3620" y="664" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="4938" y="1101" width="62" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_44" bpmnElement="Flow_WF02-create-shipment_44">
-        <di:waypoint x="6164" y="652" />
-        <di:waypoint x="6261" y="652" />
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_9" bpmnElement="Flow_WF02-create-shipment_9">
+        <di:waypoint x="2072" y="530" />
+        <di:waypoint x="2237" y="530" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_10" bpmnElement="Flow_WF02-create-shipment_10">
         <di:waypoint x="2291" y="530" />
@@ -692,57 +577,193 @@
         <di:waypoint x="2797" y="538" />
         <di:waypoint x="2873" y="538" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_16" bpmnElement="Flow_WF02-create-shipment_16">
-        <di:waypoint x="3428" y="175" />
-        <di:waypoint x="3428" y="136" />
-        <di:waypoint x="3692" y="136" />
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_14" bpmnElement="Flow_WF02-create-shipment_14">
+        <di:waypoint x="2900" y="511" />
+        <di:waypoint x="2900" y="263" />
+        <di:waypoint x="3015" y="263" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3493" y="114" width="54" height="14" />
+          <dc:Bounds x="2908" y="379" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_22" bpmnElement="Flow_WF02-create-shipment_22">
+        <di:waypoint x="2900" y="565" />
+        <di:waypoint x="2900" y="620" />
+        <di:waypoint x="3035" y="620" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2914" y="586" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_15" bpmnElement="Flow_WF02-create-shipment_15">
+        <di:waypoint x="3325" y="264" />
+        <di:waypoint x="3363" y="264" />
+        <di:waypoint x="3363" y="263" />
+        <di:waypoint x="3400" y="263" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_23" bpmnElement="Flow_WF02-create-shipment_23">
+        <di:waypoint x="3345" y="621" />
+        <di:waypoint x="3407" y="621" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_43" bpmnElement="Flow_WF02-create-shipment_43">
+        <di:waypoint x="4925" y="1110" />
+        <di:waypoint x="3570" y="1110" />
+        <di:waypoint x="3570" y="664" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4189" y="1066" width="62" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_24" bpmnElement="Flow_WF02-create-shipment_24">
+        <di:waypoint x="3733" y="621" />
+        <di:waypoint x="3770" y="621" />
+        <di:waypoint x="3770" y="685" />
+        <di:waypoint x="3813" y="685" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_16" bpmnElement="Flow_WF02-create-shipment_16">
+        <di:waypoint x="3428" y="235" />
+        <di:waypoint x="3428" y="136" />
+        <di:waypoint x="3622" y="136" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3469" y="114" width="54" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_17" bpmnElement="Flow_WF02-create-shipment_17">
-        <di:waypoint x="3456" y="203" />
-        <di:waypoint x="3550" y="203" />
-        <di:waypoint x="3550" y="263" />
-        <di:waypoint x="3690" y="263" />
+        <di:waypoint x="3456" y="263" />
+        <di:waypoint x="3620" y="263" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3576" y="228" width="77" height="27" />
+          <dc:Bounds x="3532" y="226" width="77" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_18" bpmnElement="Flow_WF02-create-shipment_18">
-        <di:waypoint x="3428" y="231" />
+        <di:waypoint x="3428" y="291" />
         <di:waypoint x="3428" y="379" />
-        <di:waypoint x="3690" y="379" />
+        <di:waypoint x="3620" y="379" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3529" y="361" width="38" height="14" />
+          <dc:Bounds x="3497" y="361" width="38" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_25" bpmnElement="Flow_WF02-create-shipment_25">
+        <di:waypoint x="3840" y="658" />
+        <di:waypoint x="3840" y="502" />
+        <di:waypoint x="3997" y="502" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3832" y="508" width="59" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_31" bpmnElement="Flow_WF02-create-shipment_31">
+        <di:waypoint x="3867" y="685" />
+        <di:waypoint x="4001" y="685" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3885" y="658" width="38" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_33" bpmnElement="Flow_WF02-create-shipment_33">
+        <di:waypoint x="3840" y="712" />
+        <di:waypoint x="3840" y="845" />
+        <di:waypoint x="3990" y="845" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3869" y="823" width="87" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_26" bpmnElement="Flow_WF02-create-shipment_26">
+        <di:waypoint x="4322" y="504" />
+        <di:waypoint x="4375" y="504" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_34" bpmnElement="Flow_WF02-create-shipment_34">
+        <di:waypoint x="4350" y="844" />
+        <di:waypoint x="4437" y="844" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_32" bpmnElement="Flow_WF02-create-shipment_32">
+        <di:waypoint x="4319" y="684" />
+        <di:waypoint x="4468" y="684" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_37" bpmnElement="Flow_WF02-create-shipment_37">
+        <di:waypoint x="5333" y="818" />
+        <di:waypoint x="5333" y="630" />
+        <di:waypoint x="5236" y="630" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5293" y="743" width="33" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_38" bpmnElement="Flow_WF02-create-shipment_38">
+        <di:waypoint x="5070" y="580" />
+        <di:waypoint x="5070" y="489" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_19" bpmnElement="Flow_WF02-create-shipment_19">
-        <di:waypoint x="3987" y="136" />
-        <di:waypoint x="4061" y="136" />
+        <di:waypoint x="3917" y="136" />
+        <di:waypoint x="3991" y="136" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_20" bpmnElement="Flow_WF02-create-shipment_20">
-        <di:waypoint x="3990" y="260" />
-        <di:waypoint x="4061" y="260" />
+        <di:waypoint x="3920" y="260" />
+        <di:waypoint x="3991" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_21" bpmnElement="Flow_WF02-create-shipment_21">
-        <di:waypoint x="3990" y="378" />
-        <di:waypoint x="4061" y="378" />
+        <di:waypoint x="3920" y="378" />
+        <di:waypoint x="3991" y="378" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_27" bpmnElement="Flow_WF02-create-shipment_27">
+        <di:waypoint x="4402" y="477" />
+        <di:waypoint x="4402" y="190" />
+        <di:waypoint x="4573" y="190" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4370" y="333" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_29" bpmnElement="Flow_WF02-create-shipment_29">
+        <di:waypoint x="4429" y="504" />
+        <di:waypoint x="4747" y="504" />
+        <di:waypoint x="4747" y="401" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4512" y="508" width="32" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_28" bpmnElement="Flow_WF02-create-shipment_28">
-        <di:waypoint x="5139" y="200" />
-        <di:waypoint x="5220" y="200" />
+        <di:waypoint x="4907" y="200" />
+        <di:waypoint x="4988" y="200" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_30" bpmnElement="Flow_WF02-create-shipment_30">
-        <di:waypoint x="5148" y="355" />
-        <di:waypoint x="5220" y="355" />
+        <di:waypoint x="4916" y="355" />
+        <di:waypoint x="4988" y="355" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_39" bpmnElement="Flow_WF02-create-shipment_39">
+        <di:waypoint x="5333" y="872" />
+        <di:waypoint x="5333" y="969" />
+        <di:waypoint x="5563" y="969" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5334" y="943" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_42" bpmnElement="Flow_WF02-create-shipment_42">
+        <di:waypoint x="5590" y="942" />
+        <di:waypoint x="5590" y="529" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5547" y="858" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_35" bpmnElement="Flow_WF02-create-shipment_35">
+        <di:waypoint x="4789" y="851" />
+        <di:waypoint x="4894" y="851" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_36" bpmnElement="Flow_WF02-create-shipment_36">
+        <di:waypoint x="5251" y="845" />
+        <di:waypoint x="5303" y="845" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_40" bpmnElement="Flow_WF02-create-shipment_40">
+        <di:waypoint x="5360" y="845" />
+        <di:waypoint x="5493" y="845" />
+        <di:waypoint x="5493" y="529" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="5388" y="791" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_WF02-create-shipment_44" bpmnElement="Flow_WF02-create-shipment_44">
+        <di:waypoint x="5493" y="431" />
+        <di:waypoint x="5493" y="339" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Participant_Carrier" bpmnElement="Participant_Carrier" isHorizontal="true">
         <dc:Bounds x="3270" y="1450" width="540" height="82" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Msg_S_Call" bpmnElement="Msg_S_Call">
-        <di:waypoint x="3540" y="664" />
-        <di:waypoint x="3540" y="1450" />
+        <di:waypoint x="3490" y="664" />
+        <di:waypoint x="3490" y="1450" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
