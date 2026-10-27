@@ -387,11 +387,9 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_23" bpmnElement="Flow_WF01-quote_23">
         <di:waypoint x="3097" y="198" />
-        <di:waypoint x="3221" y="198" />
-        <di:waypoint x="3221" y="199" />
-        <di:waypoint x="3345" y="199" />
+        <di:waypoint x="3345" y="198" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3233" y="207" width="15" height="14" />
+          <dc:Bounds x="3129" y="206" width="15" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_WF01-quote_25" bpmnElement="Flow_WF01-quote_25">
@@ -450,11 +448,11 @@
           <dc:Bounds x="3084" y="327" width="32" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Participant_GHTK" bpmnElement="Participant_GHTK" isHorizontal="true">
-        <dc:Bounds x="1020" y="1210" width="520" height="78" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Participant_GHN" bpmnElement="Participant_GHN" isHorizontal="true">
         <dc:Bounds x="1640" y="1210" width="520" height="78" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Participant_GHTK" bpmnElement="Participant_GHTK" isHorizontal="true">
+        <dc:Bounds x="1020" y="1210" width="520" height="78" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Msg_Q_GHN" bpmnElement="Msg_Q_GHN">
         <di:waypoint x="1727" y="281" />
