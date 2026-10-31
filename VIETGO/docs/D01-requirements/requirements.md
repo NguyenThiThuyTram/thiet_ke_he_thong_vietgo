@@ -57,25 +57,5 @@
 | NFR-04 | Bảo đảm tính toàn vẹn và nhất quán dữ liệu (Ensure Data Integrity & Consistency) | Hệ thống phải duy trì tính nhất quán của báo giá, cước phí, ETA, trạng thái vận đơn và COD; không tự suy diễn giá trị thiếu; không được tạo nhiều hơn một bản nháp RepeatBox cho cùng một kế hoạch và kỳ gửi. |
 | NFR-05 | Hỗ trợ bảo trì và tương thích thiết bị (Support Maintainability & Device Compatibility) | Hệ thống phải tổ chức phần tích hợp GHN và GHTK thành các thành phần độc lập, có cơ chế chuẩn hóa dữ liệu và ghi nhận lỗi tích hợp; giao diện website phải sử dụng được trên máy tính, máy tính bảng và điện thoại. |
 
-## Ghi chú đối chiếu tài liệu
 
-- Giữ số lượng và ID FR-01 đến FR-10, NFR-01 đến NFR-05 của bản PDF nhóm cung cấp.
-- Giữ đúng bố cục ba cột theo `project-template.md`.
-- Các tên requirement đã được viết lại theo cấu trúc bắt đầu bằng động từ.
-- Một số điều kiện trong phần mô tả được làm rõ từ phạm vi VIETGO (ví dụ: ETA thiếu, COD không đối soát, RepeatBox chỉ tạo bản nháp), không phải nội dung được giáo viên quy định nguyên văn.
-- Đây là bản yêu cầu cấp tổng quan. Để kiểm thử chi tiết, nên tiếp tục phân rã FR thành Use Case và Acceptance Criteria tương ứng.
 
-## Đối chiếu BR → UR → FR (đề xuất)
-
-| BR | UR | FR |
-|---|---|---|
-| BR-01 | UR-01, UR-02, UR-06 | FR-01, FR-05 |
-| BR-02 | UR-03, UR-04 | FR-02, FR-03 |
-| BR-03 | UR-02, UR-05 | FR-01, FR-04 |
-| BR-04 | UR-06, UR-07 | FR-05, FR-06 |
-| BR-05 | UR-08 | FR-07 |
-| BR-06 | UR-09 | FR-08 |
-| BR-07 | UR-10 | FR-08 |
-| BR-08 | UR-11, UR-12, UR-13, UR-14 | FR-09, FR-10 |
-
-> BR/UR và mapping là bản đề xuất dựa trên phạm vi VIETGO; cần đối chiếu với bộ BR/UR đã được nhóm phê duyệt trước khi thay thế ID trong tài liệu khác.
