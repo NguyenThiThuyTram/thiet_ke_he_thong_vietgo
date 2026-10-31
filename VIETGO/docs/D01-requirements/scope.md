@@ -1,7 +1,5 @@
 # VietGo — Scope (Phạm vi dự án)
 
-> Tài liệu tổng hợp Scope In, Scope Out và Acceptance Criteria của VietGo. Giữ nguyên nội dung nghiệp vụ và mã định danh từ bảng nguồn.
-
 ## 1. Scope In — Phạm vi thực hiện
 
 | ID | Chức năng | Mô tả phạm vi | Ưu tiên |
@@ -63,12 +61,3 @@
 | AC-14 | Báo giá lại trước khi tạo vận đơn | Khi mở bản nháp để tiếp tục quy trình gửi hàng, hệ thống phải lấy báo giá mới trước khi người dùng xác nhận tạo vận đơn. | SI-13 |
 | AC-15 | Tạm dừng kế hoạch và bỏ qua kỳ | Kế hoạch đã tạm dừng không phát sinh kỳ mới; kỳ đã bỏ qua không tự động xuất hiện lại như một kỳ cần xử lý. | SI-13 |
 | AC-16 | Liên kết kỳ gửi với vận đơn | Chỉ liên kết kỳ gửi với vận đơn khi có kết quả tạo vận đơn hợp lệ. Trường hợp thất bại hoặc chưa xác định kết quả không được ghi nhận là thành công. | SI-13 |
-
-## 4. Kiểm tra tính nhất quán
-
-- **Scope In:** 13 chức năng (9 P0, 4 P1).
-- **Scope Out:** 17 chức năng.
-- **Acceptance Criteria:** 16 tiêu chí.
-- **RepeatBox:** SI-13 phù hợp SO-15, SO-16, SO-17 và AC-10 đến AC-16: chỉ tạo bản nháp nội bộ, lấy báo giá mới và cần xác nhận trước khi tạo vận đơn.
-- **Khoảng trống nghiệm thu:** SI-10 và SI-11 chưa có tiêu chí nghiệm thu riêng; SI-01 và SI-09 mới được AC-09 bao phủ một phần. Đây là ghi nhận để nhóm xem xét, không tự ý bổ sung yêu cầu mới.
-- **Lưu ý:** Mối liên kết giữa SI và AC là phép đối chiếu theo nội dung, không phải ánh xạ chính thức từ tài liệu gốc.
