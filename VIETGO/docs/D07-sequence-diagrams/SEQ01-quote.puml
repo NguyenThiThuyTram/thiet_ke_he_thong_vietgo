@@ -1,0 +1,91 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceParticipantBorderColor #000000
+skinparam sequenceParticipantBackgroundColor #FFFFFF
+skinparam sequenceActorBorderColor #000000
+skinparam sequenceActorBackgroundColor #FFFFFF
+skinparam sequenceArrowColor #000000
+skinparam sequenceLifeLineBorderColor #000000
+skinparam sequenceLifeLineBackgroundColor #FFFFFF
+skinparam sequenceGroupBorderColor #000000
+skinparam sequenceGroupBackgroundColor #FFFFFF
+skinparam sequenceGroupHeaderBackgroundColor #FFFFFF
+skinparam sequenceReferenceBackgroundColor #FFFFFF
+skinparam sequenceMessageFontColor #000000
+skinparam sequenceMessageAlign center
+skinparam sequenceArrowThickness 1.3
+skinparam sequenceBoxBorderColor #000000
+skinparam sequenceBoxBackgroundColor #FFFFFF
+hide footbox
+
+title SEQ-01 | LẤY VÀ SO SÁNH BÁO GIÁ GHN / GHTK
+actor "Người gửi hàng" as U
+boundary "VietGo Web UI" as UI
+control "QuoteController" as QC
+control "QuoteService" as QS
+database "Database" as DB
+participant "GHNAdapter" as GA
+participant "GHTKAdapter" as TA
+participant "GHN API" as GHN
+participant "GHTK API" as GHTK
+
+U -> UI : Nhập dữ liệu và chọn Tra cứu cước
+UI -> QC : POST /api/quotes
+activate QC
+QC -> QS : requestQuotes(orderInfo)
+activate QS
+QS -> QS : validate(orderInfo)
+break Dữ liệu không hợp lệ: kết thúc
+  QS --> QC : validationErrors
+  QC --> UI : HTTP 400 + lỗi đầu vào
+  UI --> U : Yêu cầu nhập lại
+end
+QS -> DB : saveRateRequest(data)
+DB --> QS : requestId
+
+par Gọi hai hãng độc lập; tối đa 10s/hãng
+  QS -> GA : getQuote(normalizedInput)
+  activate GA
+  GA -> GHN : POST /shipping-order/fee
+  GHN --> GA : rate hoặc lỗi / timeout
+  opt Có hỗ trợ GHN Leadtime
+    GA -> GHN : POST /shipping-order/leadtime
+    GHN --> GA : ETA hoặc không có dữ liệu
+  end
+  GA --> QS : GHN result / error
+  deactivate GA
+else GHTK thực hiện độc lập
+  QS -> TA : getQuote(normalizedInput)
+  activate TA
+  TA -> GHTK : GET /services/shipment/fee
+  GHTK --> TA : rate hoặc lỗi / timeout
+  TA --> QS : GHTK result / error
+  deactivate TA
+end
+
+QS -> QS : normalizeRates(); filterAvailable()
+note over QS, DB
+  Quy tắc: phí thiếu khác 0 VNĐ.
+  Không có ETA thì hiển thị Chưa có dữ liệu ETA.
+end note
+
+alt Kết quả tổng hợp từ hai hãng có Rate hợp lệ
+  QS -> DB : saveValidRates(rates)
+  DB --> QS : saved
+  QS --> QC : rates + warnings (nếu một hãng lỗi)
+  QC --> UI : HTTP 200 + bảng so sánh
+  UI --> U : Hiển thị giá, phụ phí, ETA
+else Không có dịch vụ khả dụng
+  QS --> QC : NO_AVAILABLE_SERVICE
+  QC --> UI : Hiển thị không có dịch vụ
+  UI --> U : Cho chỉnh thông tin / tìm lại
+else Cả hai hãng lỗi / timeout
+  QS --> QC : ALL_CARRIERS_FAILED
+  QC --> UI : Hiển thị lỗi báo giá
+  UI --> U : Yêu cầu thử tra cứu sau
+end
+
+deactivate QS
+deactivate QC
+@enduml

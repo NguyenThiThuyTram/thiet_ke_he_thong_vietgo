@@ -1,0 +1,92 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceParticipantBorderColor #000000
+skinparam sequenceParticipantBackgroundColor #FFFFFF
+skinparam sequenceActorBorderColor #000000
+skinparam sequenceActorBackgroundColor #FFFFFF
+skinparam sequenceArrowColor #000000
+skinparam sequenceLifeLineBorderColor #000000
+skinparam sequenceLifeLineBackgroundColor #FFFFFF
+skinparam sequenceGroupBorderColor #000000
+skinparam sequenceGroupBackgroundColor #FFFFFF
+skinparam sequenceGroupHeaderBackgroundColor #FFFFFF
+skinparam sequenceMessageFontColor #000000
+skinparam sequenceMessageAlign center
+skinparam sequenceArrowThickness 1.3
+hide footbox
+
+title SEQ-02 | CHỌN DỊCH VỤ VÀ TẠO VẬN ĐƠN
+actor "Người gửi hàng" as U
+boundary "VietGo Web UI" as UI
+control "ShipmentController" as SC
+control "ShipmentService" as SS
+database "Database" as DB
+participant "CarrierAdapter" as AD
+participant "GHN / GHTK API" as API
+
+U -> UI : Chọn Rate hợp lệ
+UI --> U : Hiển thị thông tin để kiểm tra
+U -> UI : Xác nhận tạo vận đơn
+UI -> SC : POST /api/shipments
+activate SC
+SC -> SS : createShipment(rateId, payload, userId)
+activate SS
+SS -> SS : validateOwnerAndRate(); validatePayload()
+break Thiếu dữ liệu / Rate không hợp lệ: kết thúc
+  SS --> SC : INVALID / REQUOTE_REQUIRED
+  SC --> UI : Thông báo sửa thông tin / báo giá lại
+  UI --> U : Quay lại UC-01 (WF-01)
+end
+SS -> SS : getBookingKey(request)
+SS -> DB : findBooking(bookingKey)
+DB --> SS : existing status hoặc NOT_FOUND
+
+alt Booking key đã tồn tại và SUCCESS
+  SS --> SC : SUCCESS - trả vận đơn đã lưu
+  SC --> UI : Hiển thị vận đơn cũ
+else Đã tồn tại: PENDING / UNKNOWN
+  SS --> SC : Đang xử lý / cần xác minh
+  SC --> UI : Không gửi lại API tạo đơn
+else Đã tồn tại: FAILED
+  SS --> SC : Yêu cầu trước thất bại
+  SC --> UI : Thông báo thất bại
+else Chưa tồn tại: yêu cầu mới
+  SS -> DB : insertBookingAttempt(PENDING, key)
+  DB --> SS : attemptId
+  SS -> AD : createShipment(payload, key)
+  activate AD
+  AD -> API : POST create order (GHN hoặc GHTK)
+  API --> AD : response / reject / timeout
+  AD --> SS : normalized bookingResult
+  deactivate AD
+
+  alt Carrier xác nhận tạo thành công
+    SS -> DB : save(VietGoId, carrierCode, SUCCESS)
+    DB --> SS : transaction COMMIT / FAILED
+    alt Lưu CSDL thành công
+      SS --> SC : VietGoId + carrierCode
+      SC --> UI : HTTP thành công + mã vận đơn
+      UI --> U : Hiển thị tạo vận đơn thành công
+    else Lưu CSDL thất bại
+      SS --> SC : Cần khôi phục / xác minh
+      SC --> UI : Không thông báo tạo thành công
+    end
+  else Carrier từ chối
+    SS -> DB : updateBooking(FAILED)
+    SS --> SC : REJECTED + reason
+    SC --> UI : Hiển thị lý do từ chối
+  else Timeout / phản hồi chưa rõ
+    SS -> DB : updateBooking(UNKNOWN)
+    SS --> SC : UNKNOWN: pending verification
+    SC --> UI : Đang xác minh; không tự gửi lại
+  end
+end
+note over SS, API
+  WF-02: Đối chiếu kết quả với hãng trước khi thử lại.
+  Chỉ retry khi đã xác minh chưa tạo và hãng hỗ trợ.
+end note
+
+deactivate SS
+deactivate SC
+@enduml
