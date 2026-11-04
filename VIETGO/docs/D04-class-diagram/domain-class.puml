@@ -1,189 +1,274 @@
+
 @startuml
-title VIETGO - D04 CLASS DIAGRAM
+hide circle
+skinparam classAttributeIconSize 0
 skinparam monochrome true
 skinparam shadowing false
-skinparam classAttributeIconSize 0
-skinparam linetype ortho
-hide empty members
-left to right direction
+skinparam packageStyle rectangle
 
-class User {
-  - userId: UUID
-  - email: String
-  - role: UserRole
-  + canAccess(shipmentId): Boolean
+package "DOMAIN P0 - THUC THE NGHIEP VU" {
+  class User {
+    - userId: UUID
+    - email: String
+    - role: UserRole
+    --
+    + canAccess(shipmentId): Boolean
+  }
+
+  class RateRequest {
+    - rateRequestId: UUID
+    - userId: UUID
+    - codAmount: Decimal
+    --
+    + validate(): Boolean
+  }
+
+  class Parcel {
+    - parcelId: UUID
+    - rateRequestId: UUID
+    - weightGrams: Integer
+    - declaredValue: Decimal
+    --
+    + validateDimensions(): Boolean
+  }
+
+  class ParcelItem {
+    - parcelItemId: UUID
+    - parcelId: UUID
+    - itemName: String
+    - quantity: Integer
+    - itemPrice: Decimal
+    --
+    + subtotal(): Decimal
+  }
+
+  class QuoteAttempt {
+    - quoteAttemptId: UUID
+    - rateRequestId: UUID
+    - carrierId: UUID
+    - requestStatus: String
+    - isMock: Boolean
+    --
+    + recordResult(): void
+  }
+
+  class Rate {
+    - rateId: UUID
+    - quoteAttemptId: UUID
+    - serviceId: UUID
+    - totalFee: Decimal?
+    - etaMinDays: Integer?
+    - expiresAt: DateTime?
+    --
+    + isSelectable(): Boolean
+  }
+
+  class Carrier {
+    - carrierId: UUID
+    - carrierCode: String
+    - carrierName: String
+    - isActive: Boolean
+    --
+    + isAvailable(): Boolean
+  }
+
+  class CarrierService {
+    - serviceId: UUID
+    - carrierId: UUID
+    - serviceCode: String
+    - serviceName: String
+    - isActive: Boolean
+    --
+    + supportsRoute(): Boolean
+  }
+
+  class Shipment {
+    - shipmentId: UUID
+    - userId: UUID
+    - rateId: UUID
+    - shipmentStatusId: UUID?
+    - bookingKey: String {unique}
+    - bookingStatus: BookingStatus
+    - codAmount: Decimal
+    --
+    + markBookingUnknown(): void
+    + confirmBooking(code): void
+  }
+
+  class BookingAttempt {
+    - bookingAttemptId: UUID
+    - shipmentId: UUID
+    - attemptNo: Integer
+    - attemptStatus: BookingStatus
+    - carrierReference: String?
+    --
+    + recordResponse(): void
+  }
+
+  class TrackingEvent {
+    - trackingEventId: UUID
+    - shipmentId: UUID
+    - shipmentStatusId: UUID?
+    - carrierStatus: String
+    - normalizedStatus: String?
+    - eventTime: DateTime
+    --
+    + normalize(): String?
+  }
+
+  class ShipmentStatus {
+    - shipmentStatusId: UUID
+    - statusCode: String
+    - statusName: String
+    - isFinal: Boolean
+    --
+    + isTerminal(): Boolean
+  }
 }
 
-class RateRequest {
-  - rateRequestId: UUID
-  - userId: UUID
-  - codAmount: Decimal
-  + validate(): Boolean
+package "APPLICATION SERVICES P0" {
+  class QuoteService <<service>> {
+    + getQuotes(input): List<Rate>
+    + normalizeQuotes(): List<Rate>
+  }
+
+  class ShipmentService <<service>> {
+    + createShipment(rateId, key): Shipment
+    + checkCarrierBeforeRetry(): BookingStatus
+  }
+
+  class TrackingService <<service>> {
+    + getCurrentStatus(id): String
+    + getHistory(id): List<TrackingEvent>
+  }
 }
 
-class Parcel {
-  - parcelId: UUID
-  - weightGrams: Integer
-  - declaredValue: Decimal
-  + validateDimensions(): Boolean
+package "CARRIER INTEGRATION P0" {
+  interface CarrierAdapter {
+    + getRates(request): List<Rate>
+    + createBooking(s): BookingResult
+    + findBooking(reference): BookingResult?
+    + getTracking(code): List<TrackingEvent>
+  }
+
+  class GHNAdapter <<adapter>> {
+    + getRates(): List<Rate>
+    + createBooking(): BookingResult
+  }
+
+  class GHTKAdapter <<adapter>> {
+    + getRates(): List<Rate>
+    + createBooking(): BookingResult
+  }
+
+  class BookingResult <<DTO>> {
+    - status: BookingStatus
+    - carrierTrackingCode: String?
+    - carrierReference: String?
+    --
+    + isConfirmed(): Boolean
+  }
 }
 
-class ParcelItem {
-  - itemName: String
-  - quantity: Integer
-  - itemPrice: Decimal
-  + subtotal(): Decimal
+package "REPEATBOX P1" {
+  class ShipmentTemplate {
+    - templateId: UUID
+    - userId: UUID
+    - templateName: String
+    --
+    + updateSnapshot(): void
+  }
+
+  class RepeatPlan {
+    - repeatPlanId: UUID
+    - templateId: UUID
+    - userId: UUID
+    - frequency: RepeatFrequency
+    - planStatus: RepeatPlanStatus
+    - nextRunDate: Date
+    --
+    + pause(): void
+    + resume(): void
+  }
+
+  class RepeatOccurrence {
+    - occurrenceId: UUID
+    - repeatPlanId: UUID
+    - rateRequestId: UUID?
+    - shipmentId: UUID?
+    - scheduledFor: Date
+    - status: RepeatOccurrenceStatus
+    --
+    + markSkipped(): void
+    + linkShipment(s): void
+  }
+
+  class RepeatBoxService <<service>> {
+    + createDraftForDuePlan(): RepeatOccurrence
+    + skipOccurrence(id): void
+  }
 }
 
-class QuoteAttempt {
-  - quoteAttemptId: UUID
-  - requestStatus: String
-  - isMock: Boolean
-  + recordResult(): void
+package "VALUE TYPES - ENUM" {
+  enum UserRole {
+    USER
+    ADMIN
+  }
+
+  enum BookingStatus {
+    PENDING
+    SUCCESS
+    FAILED
+    UNKNOWN
+  }
+
+  enum RepeatFrequency {
+    WEEKLY
+    MONTHLY
+  }
+
+  enum RepeatPlanStatus {
+    ACTIVE
+    PAUSED
+    ENDED
+  }
+
+  enum RepeatOccurrenceStatus {
+    DRAFT_READY
+    SKIPPED
+    SHIPMENT_CREATED
+  }
 }
 
-class Rate {
-  - rateId: UUID
-  - totalFee: Decimal?
-  - etaMinDays: Integer?
-  - expiresAt: DateTime?
-  + isSelectable(): Boolean
-}
+User "1" -- "0..*" RateRequest : creates
+RateRequest "1" *-- "0..1" Parcel : has
+Parcel "1" *-- "0..*" ParcelItem : contains
+RateRequest "1" *-- "0..*" QuoteAttempt : logs
+QuoteAttempt "0..*" --> "1" Carrier : for
+QuoteAttempt "1" *-- "0..*" Rate : returns
+Carrier "1" -- "0..*" CarrierService : provides
+CarrierService "1" -- "0..*" Rate : offered in
+User "1" -- "0..*" Shipment : owns
+Rate "1" -- "0..*" Shipment : selected for
+Shipment "1" *-- "0..*" BookingAttempt : records
+Shipment "1" *-- "0..*" TrackingEvent : has history
+Shipment "0..*" --> "0..1" ShipmentStatus : current status
+TrackingEvent "0..*" --> "0..1" ShipmentStatus : mapped to
 
-class Carrier {
-  - carrierCode: String
-  - carrierName: String
-  - isActive: Boolean
-  + isAvailable(): Boolean
-}
+User "1" -- "0..*" ShipmentTemplate : owns
+ShipmentTemplate "1" -- "0..*" RepeatPlan : used by
+RepeatPlan "1" *-- "0..*" RepeatOccurrence : schedules
+RepeatOccurrence "0..1" --> "0..1" Shipment : links after success
+RepeatOccurrence "0..1" --> "0..1" RateRequest : re-quotes via
 
-class CarrierService {
-  - serviceCode: String
-  - serviceName: String
-  - isActive: Boolean
-  + supportsRoute(): Boolean
-}
+QuoteService ..> CarrierAdapter : uses
+ShipmentService ..> CarrierAdapter : uses
+TrackingService ..> CarrierAdapter : uses
+RepeatBoxService ..> RepeatPlan : manages
+RepeatBoxService ..> RepeatOccurrence : creates
 
-class Shipment {
-  - shipmentId: UUID
-  - bookingKey: String {unique}
-  - bookingStatus: BookingStatus
-  - shipmentStatus: String?
-  - codAmount: Decimal
-  + markBookingUnknown(): void
-  + confirmBooking(code): void
-}
-
-class BookingAttempt {
-  - attemptNo: Integer
-  - attemptStatus: BookingStatus
-  - carrierReference: String?
-  + recordResponse(): void
-}
-
-class TrackingEvent {
-  - carrierStatus: String
-  - normalizedStatus: String?
-  - eventTime: DateTime
-  + normalize(): String?
-}
-
-class ShipmentStatus {
-  - statusCode: String
-  - statusName: String
-  - isFinal: Boolean
-  + isTerminal(): Boolean
-}
-
-class QuoteService <<service>> {
-  + getQuotes(input): List<Rate>
-  + normalizeQuotes(): List<Rate>
-}
-
-class ShipmentService <<service>> {
-  + createShipment(rateId, key): Shipment
-  + checkCarrierBeforeRetry(): BookingStatus
-}
-
-class TrackingService <<service>> {
-  + getCurrentStatus(id): String
-  + getHistory(id): List<TrackingEvent>
-}
-
-interface CarrierAdapter {
-  + getRates(request): List<Rate>
-  + createBooking(s): BookingResult
-  + findBooking(reference): BookingResult?
-  + getTracking(code): List<TrackingEvent>
-}
-
-class GHNAdapter <<adapter>> {
-  + getRates(): List<Rate>
-  + createBooking(): BookingResult
-}
-
-class GHTKAdapter <<adapter>> {
-  + getRates(): List<Rate>
-  + createBooking(): BookingResult
-}
-
-class BookingResult <<DTO>> {
-  - status: BookingStatus
-  - carrierTrackingCode: String?
-  - carrierReference: String?
-  + isConfirmed(): Boolean
-}
-
-class ShipmentTemplate {
-  - templateId: UUID
-  - userId: UUID
-  - templateName: String
-  + updateSnapshot(): void
-}
-
-class RepeatPlan {
-  - repeatPlanId: UUID
-  - frequency: WEEKLY \| MONTHLY
-  - planStatus: ACTIVE \| PAUSED \| ENDED
-  - nextRunDate: Date
-  + pause(): void
-  + resume(): void
-}
-
-class RepeatOccurrence {
-  - occurrenceId: UUID
-  - scheduledFor: Date
-  - status: DRAFT_READY \| SKIPPED \| SHIPMENT_CREATED
-  + markSkipped(): void
-  + linkShipment(s): void
-}
-
-class RepeatBoxService <<service>> {
-  + createDraftForDuePlan(): RepeatOccurrence
-  + skipOccurrence(id): void
-}
-
-' Relationships converted from draw.io
-User -- RateRequest
-RateRequest *-- Parcel
-Parcel *-- ParcelItem
-RateRequest *-- QuoteAttempt
-QuoteAttempt *-- Rate
-Carrier -- CarrierService
-CarrierService -- Rate
-Rate -- Shipment
-Shipment *-- BookingAttempt
-Shipment *-- TrackingEvent
-ShipmentStatus -- TrackingEvent
-ShipmentTemplate -- RepeatPlan
-RepeatPlan *-- RepeatOccurrence
-QuoteService ..> CarrierAdapter
-ShipmentService ..> CarrierAdapter
-TrackingService ..> CarrierAdapter
 GHNAdapter ..|> CarrierAdapter
 GHTKAdapter ..|> CarrierAdapter
-CarrierAdapter ..> BookingResult
-RepeatBoxService ..> RepeatPlan
-RepeatBoxService ..> RepeatOccurrence
+CarrierAdapter ..> BookingResult : returns
 
 @enduml
