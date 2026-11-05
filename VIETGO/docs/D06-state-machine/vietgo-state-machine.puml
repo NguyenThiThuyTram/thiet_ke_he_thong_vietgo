@@ -1,0 +1,42 @@
+@startuml
+' Converted from vietgo-state-machine.drawio
+ title VIETGO - SHIPMENT STATE MACHINE
+hide empty description
+skinparam shadowing false
+skinparam state {
+ BackgroundColor White
+ BorderColor #333333
+ FontColor #111111
+ RoundCorner 18
+}
+
+[*] --> WAITING_PICKUP : Booking success
+WAITING_PICKUP --> PICKED_UP : Pickup confirmed
+PICKED_UP --> IN_TRANSIT : Dispatch confirmed
+IN_TRANSIT --> OUT_FOR_DELIVERY : Out for delivery
+OUT_FOR_DELIVERY --> DELIVERED : Delivery confirmed
+
+WAITING_PICKUP --> CANCELLED : Cancellation confirmed
+IN_TRANSIT --> NEEDS_ATTENTION : Exception detected
+NEEDS_ATTENTION --> IN_TRANSIT : Recovery confirmed
+OUT_FOR_DELIVERY --> DELIVERY_FAILED : Delivery failed
+DELIVERY_FAILED --> REDELIVERY : Retry approved
+REDELIVERY --> OUT_FOR_DELIVERY : Retry started
+DELIVERY_FAILED --> RETURNING : Return approved
+IN_TRANSIT --> RETURNING : Return initiated
+RETURNING --> RETURNED : Return completed
+
+DELIVERED --> [*]
+RETURNED --> [*]
+CANCELLED --> [*]
+
+note bottom of DELIVERED
+  Terminal outcome
+end note
+note bottom of RETURNED
+  Terminal outcome
+end note
+note bottom of CANCELLED
+  Terminal outcome
+end note
+@enduml
