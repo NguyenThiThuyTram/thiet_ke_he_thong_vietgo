@@ -52,9 +52,12 @@ else Đã tồn tại: FAILED
   SS --> SC : Yêu cầu trước thất bại
   SC --> UI : Thông báo thất bại
 else Chưa tồn tại: yêu cầu mới
-  SS -> DB : insertBookingAttempt(PENDING, key)
+  ' Shipment PENDING là bản ghi nội bộ, chưa được carrier xác nhận.
+  SS -> DB : createPendingShipment(rateId, bookingKey)
+  DB --> SS : shipmentId
+  SS -> DB : insertBookingAttempt(shipmentId, PENDING)
   DB --> SS : attemptId
-  SS -> AD : createShipment(payload, key)
+  SS -> AD : createShipment(payload, bookingKey)
   activate AD
   AD -> API : POST create order (GHN hoặc GHTK)
   API --> AD : response / reject / timeout
@@ -62,7 +65,7 @@ else Chưa tồn tại: yêu cầu mới
   deactivate AD
 
   alt Carrier xác nhận tạo thành công
-    SS -> DB : save(VietGoId, carrierCode, SUCCESS)
+    SS -> DB : updateShipment(shipmentId, carrierCode, SUCCESS)
     DB --> SS : transaction COMMIT / FAILED
     alt Lưu CSDL thành công
       SS --> SC : VietGoId + carrierCode
