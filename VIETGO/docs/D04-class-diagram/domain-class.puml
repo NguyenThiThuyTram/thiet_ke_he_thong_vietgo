@@ -6,9 +6,14 @@ skinparam monochrome true
 skinparam shadowing false
 skinparam packageStyle rectangle
 
+' ==========================================
+' 01. DOMAIN P0
+' ==========================================
+
 package "DOMAIN P0 - THUC THE NGHIEP VU" {
+
   class User {
-    - userId: UUID
+    - userId: Long
     - email: String
     - role: UserRole
     --
@@ -17,7 +22,7 @@ package "DOMAIN P0 - THUC THE NGHIEP VU" {
 
   class RateRequest {
     - rateRequestId: UUID
-    - userId: UUID
+    - userId: Long
     - codAmount: Decimal
     --
     + validate(): Boolean
@@ -53,7 +58,7 @@ package "DOMAIN P0 - THUC THE NGHIEP VU" {
   }
 
   class Rate {
-    - rateId: UUID
+    - rateId: Long
     - quoteAttemptId: UUID
     - serviceId: UUID
     - totalFee: Decimal?
@@ -83,10 +88,10 @@ package "DOMAIN P0 - THUC THE NGHIEP VU" {
   }
 
   class Shipment {
-    - shipmentId: UUID
-    - userId: UUID
-    - rateId: UUID
-    - shipmentStatusId: UUID?
+    - shipmentId: Long
+    - userId: Long
+    - rateId: Long
+    - shipmentStatus: String?
     - bookingKey: String {unique}
     - bookingStatus: BookingStatus
     - codAmount: Decimal
@@ -97,7 +102,7 @@ package "DOMAIN P0 - THUC THE NGHIEP VU" {
 
   class BookingAttempt {
     - bookingAttemptId: UUID
-    - shipmentId: UUID
+    - shipmentId: Long
     - attemptNo: Integer
     - attemptStatus: BookingStatus
     - carrierReference: String?
@@ -107,8 +112,8 @@ package "DOMAIN P0 - THUC THE NGHIEP VU" {
 
   class TrackingEvent {
     - trackingEventId: UUID
-    - shipmentId: UUID
-    - shipmentStatusId: UUID?
+    - shipmentId: Long
+    - shipmentStatus: String?
     - carrierStatus: String
     - normalizedStatus: String?
     - eventTime: DateTime
@@ -117,7 +122,6 @@ package "DOMAIN P0 - THUC THE NGHIEP VU" {
   }
 
   class ShipmentStatus {
-    - shipmentStatusId: UUID
     - statusCode: String
     - statusName: String
     - isFinal: Boolean
@@ -126,7 +130,12 @@ package "DOMAIN P0 - THUC THE NGHIEP VU" {
   }
 }
 
+' ==========================================
+' 02. APPLICATION SERVICES P0
+' ==========================================
+
 package "APPLICATION SERVICES P0" {
+
   class QuoteService <<service>> {
     + getQuotes(input): List<Rate>
     + normalizeQuotes(): List<Rate>
@@ -143,7 +152,12 @@ package "APPLICATION SERVICES P0" {
   }
 }
 
+' ==========================================
+' 03. CARRIER INTEGRATION P0
+' ==========================================
+
 package "CARRIER INTEGRATION P0" {
+
   interface CarrierAdapter {
     + getRates(request): List<Rate>
     + createBooking(s): BookingResult
@@ -170,10 +184,15 @@ package "CARRIER INTEGRATION P0" {
   }
 }
 
+' ==========================================
+' 04. REPEATBOX P1
+' ==========================================
+
 package "REPEATBOX P1" {
+
   class ShipmentTemplate {
     - templateId: UUID
-    - userId: UUID
+    - userId: Long
     - templateName: String
     --
     + updateSnapshot(): void
@@ -182,7 +201,7 @@ package "REPEATBOX P1" {
   class RepeatPlan {
     - repeatPlanId: UUID
     - templateId: UUID
-    - userId: UUID
+    - userId: Long
     - frequency: RepeatFrequency
     - planStatus: RepeatPlanStatus
     - nextRunDate: Date
@@ -195,7 +214,7 @@ package "REPEATBOX P1" {
     - occurrenceId: UUID
     - repeatPlanId: UUID
     - rateRequestId: UUID?
-    - shipmentId: UUID?
+    - shipmentId: Long?
     - scheduledFor: Date
     - status: RepeatOccurrenceStatus
     --
@@ -209,7 +228,12 @@ package "REPEATBOX P1" {
   }
 }
 
+' ==========================================
+' 05. VALUE TYPES / ENUMS
+' ==========================================
+
 package "VALUE TYPES - ENUM" {
+
   enum UserRole {
     USER
     ADMIN
@@ -240,35 +264,146 @@ package "VALUE TYPES - ENUM" {
   }
 }
 
+' ==========================================
+' 06. COMPLAINT MODULE - UC-06
+' ==========================================
+
+package "06 COMPLAINT MODULE - UC-06" {
+
+  class Complaint {
+    - complaintId: Long
+    - shipmentId: Long
+    - userId: Long
+    - carrierTicketId: String?
+    - reason: String
+    - description: String
+    - status: String
+    - createdAt: DateTime
+    --
+    + submit(): void
+    + updateStatus(status: String): void
+    + close(): void
+  }
+
+  class ComplaintEvidence {
+    - evidenceId: Long
+    - complaintId: Long
+    - fileUrl: String
+    - fileType: String
+    - uploadedAt: DateTime
+    --
+    + validateFile(): Boolean
+  }
+
+  class ComplaintHistory {
+    - historyId: Long
+    - complaintId: Long
+    - action: String
+    - oldStatus: String?
+    - newStatus: String
+    - createdAt: DateTime
+    --
+    + recordChange(): void
+  }
+
+  class ComplaintService <<service>> {
+    + createComplaint(): Complaint
+    + addEvidence(): void
+    + updateComplaintStatus(): void
+    + getComplaintHistory(): List<ComplaintHistory>
+  }
+
+  class ComplaintRepository <<repository>> {
+    + save(complaint: Complaint): void
+    + findById(id: Long): Complaint?
+    + findByShipment(id: Long): List<Complaint>
+    + saveHistory(history: ComplaintHistory): void
+  }
+
+  class CarrierSupportGateway <<gateway>> {
+    + submitGHNTicket(complaint: Complaint): String?
+    + getGHNTicketDetail(id: String): String
+    + recordManualForward(complaint: Complaint): void
+    + syncSupportResult(id: Long): void
+  }
+}
+
+' ==========================================
+' UML RELATIONSHIPS - DOMAIN P0
+' ==========================================
+
 User "1" -- "0..*" RateRequest : creates
+
 RateRequest "1" *-- "0..1" Parcel : has
 Parcel "1" *-- "0..*" ParcelItem : contains
+
 RateRequest "1" *-- "0..*" QuoteAttempt : logs
 QuoteAttempt "0..*" --> "1" Carrier : for
 QuoteAttempt "1" *-- "0..*" Rate : returns
+
 Carrier "1" -- "0..*" CarrierService : provides
 CarrierService "1" -- "0..*" Rate : offered in
+
 User "1" -- "0..*" Shipment : owns
-Rate "1" -- "0..*" Shipment : selected for
+Rate "1" -- "0..1" Shipment : selected for
+
 Shipment "1" *-- "0..*" BookingAttempt : records
 Shipment "1" *-- "0..*" TrackingEvent : has history
+
 Shipment "0..*" --> "0..1" ShipmentStatus : current status
 TrackingEvent "0..*" --> "0..1" ShipmentStatus : mapped to
 
+' ==========================================
+' UML RELATIONSHIPS - REPEATBOX P1
+' ==========================================
+
 User "1" -- "0..*" ShipmentTemplate : owns
+
 ShipmentTemplate "1" -- "0..*" RepeatPlan : used by
+
 RepeatPlan "1" *-- "0..*" RepeatOccurrence : schedules
+
 RepeatOccurrence "0..1" --> "0..1" Shipment : links after success
 RepeatOccurrence "0..1" --> "0..1" RateRequest : re-quotes via
+
+' ==========================================
+' DEPENDENCIES / REALIZATION
+' ==========================================
 
 QuoteService ..> CarrierAdapter : uses
 ShipmentService ..> CarrierAdapter : uses
 TrackingService ..> CarrierAdapter : uses
+
 RepeatBoxService ..> RepeatPlan : manages
 RepeatBoxService ..> RepeatOccurrence : creates
 
 GHNAdapter ..|> CarrierAdapter
 GHTKAdapter ..|> CarrierAdapter
+
 CarrierAdapter ..> BookingResult : returns
+
+' ==========================================
+' UML RELATIONSHIPS - COMPLAINT UC-06
+' ==========================================
+
+' Association
+User "1" -- "0..*" Complaint : submits
+Shipment "1" -- "0..*" Complaint : has complaints
+
+' Composition
+Complaint "1" *-- "0..*" ComplaintEvidence : has evidence
+Complaint "1" *-- "0..*" ComplaintHistory : records history
+
+' Dependency
+ComplaintService ..> Complaint : manages
+ComplaintService ..> ComplaintRepository : uses
+ComplaintService ..> CarrierSupportGateway : forwards via
+ComplaintRepository ..> Complaint : persists
+
+note right of CarrierSupportGateway
+  GHN: Official Complaint Ticket API
+  GHTK: Manual forwarding via CSKH
+  No unverified GHTK complaint API
+end note
 
 @enduml
