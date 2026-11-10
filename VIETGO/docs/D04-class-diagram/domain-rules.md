@@ -1,349 +1,450 @@
 # D04 — Class Diagram & Domain Rules | VietGo
 
-## 1. Mục đích và phạm vi
+## 1. Mục tiêu và phạm vi
 
-Class Diagram mô tả cấu trúc lớp, thuộc tính, phương thức và các mối quan hệ trong hệ thống VietGo, tập trung vào các chức năng thuộc MVP P0 và phần mở rộng RepeatBox P1.
+Tài liệu mô tả cấu trúc lớp, trách nhiệm của từng lớp, quan hệ UML và các quy tắc nghiệp vụ trong hệ thống VietGo. Class Diagram được xây dựng dựa trên yêu cầu chức năng và thiết kế cơ sở dữ liệu D03.
 
-**Phạm vi thiết kế:**
+Phạm vi mô hình bao gồm:
 
-- **UC-01 — Báo giá và so sánh:** Tra cứu cước vận chuyển từ GHN/GHTK, chuẩn hóa và so sánh các phương án báo giá.
-- **UC-02 — Tạo vận đơn:** Người dùng lựa chọn dịch vụ, xác nhận đặt đơn và theo dõi kết quả booking.
-- **UC-03 — Theo dõi vận chuyển:** Xem trạng thái hiện tại và lịch sử vận chuyển.
-- **UC-04 — Thông tin COD:** Quản lý và hiển thị số tiền thu hộ theo thông tin vận đơn.
-- **UC-05 — RepeatBox (P1):** Quản lý mẫu đơn, lập lịch gửi hàng định kỳ và tạo bản nháp nội bộ.
+- **UC-01:** Lấy và so sánh báo giá vận chuyển GHN/GHTK.
+- **UC-02:** Chọn dịch vụ và tạo vận đơn.
+- **UC-03:** Theo dõi vận đơn và lịch sử vận chuyển.
+- **UC-04:** Xem thông tin COD.
+- **UC-05 (P1):** RepeatBox — quản lý kế hoạch gửi hàng định kỳ.
+- **UC-06:** Tiếp nhận và xử lý khiếu nại vận chuyển.
 
-Class Diagram gồm **28 thành phần (class, interface và enum), 27 quan hệ UML**, được chia thành 5 package.
+UC-06 được bổ sung vào mô hình hiện có, không thay thế các chức năng UC-01 đến UC-05.
 
-Sơ đồ được xây dựng từ các yêu cầu chức năng, Use Case và mô hình dữ liệu ERD D03 của VietGo. Đây là **mô hình thiết kế lớp**, không phải sơ đồ cơ sở dữ liệu; các service, adapter, DTO và enum không mặc nhiên tương ứng với bảng trong CSDL.
+## 2. Tổ chức Class Diagram
 
----
+### 2.1. Domain P0 — Thực thể nghiệp vụ
 
-## 2. Các package và trách nhiệm
+Bao gồm 12 class:
 
-| Package | Thành phần | Trách nhiệm |
-|---|---|---|
-| **Domain P0** | User, RateRequest, Parcel, ParcelItem, QuoteAttempt, Rate, Carrier, CarrierService, Shipment, BookingAttempt, TrackingEvent, ShipmentStatus | Biểu diễn thực thể và quy tắc nghiệp vụ cốt lõi |
-| **Application Services P0** | QuoteService, ShipmentService, TrackingService | Điều phối xử lý báo giá, tạo vận đơn và theo dõi |
-| **Carrier Integration P0** | CarrierAdapter, GHNAdapter, GHTKAdapter, BookingResult | Tích hợp và chuẩn hóa phản hồi API từ GHN/GHTK |
-| **RepeatBox P1** | ShipmentTemplate, RepeatPlan, RepeatOccurrence, RepeatBoxService | Quản lý gửi hàng định kỳ, tạo bản nháp và liên kết vận đơn |
-| **Value Types / Enum** | UserRole, BookingStatus, RepeatFrequency, RepeatPlanStatus, RepeatOccurrenceStatus | Định nghĩa các tập giá trị và trạng thái sử dụng trong hệ thống |
-
-### 2.1. Domain P0
-
-Các class thuộc Domain P0 lưu trữ dữ liệu nghiệp vụ và thực hiện những thao tác trực tiếp trên thực thể.
-
-- `User`: Thông tin người dùng và quyền truy cập.
-- `RateRequest`: Yêu cầu tra cứu báo giá.
-- `Parcel`: Thông tin kiện hàng.
-- `ParcelItem`: Các mặt hàng thuộc kiện hàng.
-- `QuoteAttempt`: Ghi nhận từng lần gọi API báo giá.
-- `Rate`: Phương án cước vận chuyển nhận được.
-- `Carrier`: Hãng vận chuyển GHN/GHTK.
-- `CarrierService`: Dịch vụ vận chuyển thuộc hãng.
-- `Shipment`: Vận đơn do người dùng tạo.
-- `BookingAttempt`: Lịch sử các lần yêu cầu tạo vận đơn.
-- `TrackingEvent`: Sự kiện cập nhật vận chuyển.
-- `ShipmentStatus`: Danh mục trạng thái vận chuyển chuẩn hóa.
+| Class | Trách nhiệm |
+|---|---|
+| User | Quản lý thông tin người dùng và quyền truy cập |
+| RateRequest | Lưu yêu cầu báo giá |
+| Parcel | Lưu thông tin kiện hàng |
+| ParcelItem | Lưu các mặt hàng trong kiện |
+| QuoteAttempt | Ghi nhận từng lần gọi API báo giá |
+| Rate | Lưu phương án vận chuyển và chi phí |
+| Carrier | Quản lý thông tin hãng vận chuyển |
+| CarrierService | Quản lý dịch vụ của từng hãng |
+| Shipment | Quản lý vận đơn và thông tin COD |
+| BookingAttempt | Ghi nhận quá trình gọi API tạo vận đơn |
+| TrackingEvent | Lưu lịch sử trạng thái vận chuyển |
+| ShipmentStatus | Danh mục trạng thái vận chuyển chuẩn hóa |
 
 ### 2.2. Application Services P0
 
-- `QuoteService`: Xử lý yêu cầu báo giá và chuẩn hóa kết quả.
-- `ShipmentService`: Điều phối tạo vận đơn và kiểm tra kết quả booking trước khi retry.
-- `TrackingService`: Tra cứu trạng thái hiện tại và lịch sử vận chuyển.
+- **QuoteService:** Điều phối lấy báo giá từ các hãng và chuẩn hóa kết quả.
+- **ShipmentService:** Điều phối tạo vận đơn, quản lý kết quả booking và xử lý timeout.
+- **TrackingService:** Tra cứu trạng thái vận chuyển và lịch sử tracking.
 
 ### 2.3. Carrier Integration P0
 
-`CarrierAdapter` định nghĩa các phương thức chung để làm việc với hãng vận chuyển:
+- **CarrierAdapter:** Interface định nghĩa các thao tác tích hợp chung.
+- **GHNAdapter:** Triển khai tích hợp vận chuyển GHN.
+- **GHTKAdapter:** Triển khai tích hợp vận chuyển GHTK.
+- **BookingResult:** DTO biểu diễn kết quả tạo vận đơn.
 
-- `getRates()`: Lấy báo giá.
-- `createBooking()`: Gửi yêu cầu tạo vận đơn.
-- `findBooking()`: Kiểm tra kết quả booking.
-- `getTracking()`: Lấy thông tin vận chuyển.
-
-`GHNAdapter` và `GHTKAdapter` hiện thực interface `CarrierAdapter`. `BookingResult` là DTO chứa kết quả booking, không phải thực thể lưu trữ độc lập.
+GHNAdapter và GHTKAdapter hiện thực CarrierAdapter, giúp các Application Service không phụ thuộc trực tiếp vào cấu trúc API riêng của từng hãng.
 
 ### 2.4. RepeatBox P1
 
-- `ShipmentTemplate`: Mẫu thông tin gửi hàng.
-- `RepeatPlan`: Kế hoạch gửi hàng định kỳ.
-- `RepeatOccurrence`: Một kỳ gửi cụ thể theo kế hoạch.
-- `RepeatBoxService`: Xử lý việc tạo bản nháp và bỏ qua kỳ gửi.
+- **ShipmentTemplate:** Lưu mẫu thông tin gửi hàng.
+- **RepeatPlan:** Quản lý kế hoạch gửi hàng định kỳ.
+- **RepeatOccurrence:** Biểu diễn từng kỳ gửi hàng.
+- **RepeatBoxService:** Tạo bản nháp và quản lý các kỳ gửi.
 
-### 2.5. Value Types / Enum
+RepeatBox chỉ hỗ trợ chuẩn bị vận đơn. Scheduler không tự động đặt vận đơn với hãng vận chuyển.
 
-| Enum | Giá trị |
+### 2.5. Value Types / Enums
+
+Hệ thống sử dụng các enum:
+
+- UserRole: USER, ADMIN.
+- BookingStatus: PENDING, SUCCESS, FAILED, UNKNOWN.
+- RepeatFrequency: WEEKLY, MONTHLY.
+- RepeatPlanStatus: ACTIVE, PAUSED, ENDED.
+- RepeatOccurrenceStatus: DRAFT_READY, SKIPPED, SHIPMENT_CREATED.
+
+### 2.6. Complaint Module — UC-06
+
+Complaint Module được bổ sung để hỗ trợ tiếp nhận, lưu trữ, theo dõi và xử lý khiếu nại liên quan đến vận đơn.
+
+Module gồm 6 class:
+
+| Class | Trách nhiệm |
 |---|---|
-| `UserRole` | USER, ADMIN |
-| `BookingStatus` | PENDING, SUCCESS, FAILED, UNKNOWN |
-| `RepeatFrequency` | WEEKLY, MONTHLY |
-| `RepeatPlanStatus` | ACTIVE, PAUSED, ENDED |
-| `RepeatOccurrenceStatus` | DRAFT_READY, SKIPPED, SHIPMENT_CREATED |
+| Complaint | Biểu diễn phiếu khiếu nại và trạng thái xử lý |
+| ComplaintEvidence | Quản lý bằng chứng, hình ảnh và tài liệu |
+| ComplaintHistory | Ghi lịch sử thay đổi và phản hồi |
+| ComplaintService | Điều phối nghiệp vụ khiếu nại |
+| ComplaintRepository | Lưu trữ và truy xuất dữ liệu khiếu nại |
+| CarrierSupportGateway | Điều phối chuyển tiếp yêu cầu đến kênh hỗ trợ hãng |
 
----
+Complaint Module dùng chung cho GHN và GHTK nhưng hỗ trợ hai phương thức chuyển tiếp khác nhau.
 
-## 3. Quy tắc nghiệp vụ theo Use Case
+## 3. Business Rules — Quy tắc nghiệp vụ
 
-### 3.1. UC-01 — Báo giá và so sánh
+### 3.1. UC-01 — Báo giá và so sánh vận chuyển
 
-**Các class liên quan:** `User`, `RateRequest`, `Parcel`, `ParcelItem`, `QuoteAttempt`, `Carrier`, `CarrierService`, `Rate`, `QuoteService`.
+**BR-01:** Mỗi RateRequest thuộc về một User và có thể phát sinh nhiều QuoteAttempt.
 
-**Quy tắc nghiệp vụ:**
+**BR-02:** Mỗi QuoteAttempt ghi nhận một lần gọi báo giá đến Carrier cụ thể. Kết quả báo giá của GHN và GHTK phải được xử lý độc lập.
 
-1. Một `User` có thể tạo nhiều `RateRequest`, nhưng mỗi yêu cầu báo giá thuộc một người dùng.
-2. `RateRequest` chứa tối đa một `Parcel` theo mô hình hiện tại.
-3. Mỗi `Parcel` có thể chứa nhiều `ParcelItem`.
-4. Một `RateRequest` có thể phát sinh nhiều `QuoteAttempt` khi hệ thống tra cứu cước.
-5. Mỗi `QuoteAttempt` thuộc một `Carrier` cụ thể.
-6. Một `QuoteAttempt` có thể nhận nhiều phương án `Rate`.
-7. Mỗi `Rate` tương ứng với một `CarrierService`.
-8. `QuoteService` gọi API thông qua `CarrierAdapter` để lấy và chuẩn hóa báo giá.
-9. Lỗi API của một hãng không làm mất kết quả hợp lệ từ hãng còn lại.
-10. Không tự gán phí chưa có dữ liệu thành 0 hoặc tự dự đoán thời gian giao hàng.
+**BR-03:** Mỗi Rate phải thuộc đúng CarrierService và Carrier được sử dụng trong yêu cầu báo giá.
 
-**Phương thức tiêu biểu:**
+**BR-04:** VietGo không tự suy đoán ETA hoặc thành phần chi phí nếu hãng không cung cấp.
 
-- `RateRequest.validate()`: Kiểm tra tính hợp lệ của yêu cầu.
-- `Parcel.validateDimensions()`: Kiểm tra thông tin kiện hàng.
-- `ParcelItem.subtotal()`: Tính thành tiền mặt hàng.
-- `QuoteAttempt.recordResult()`: Ghi nhận kết quả tra cứu.
-- `Rate.isSelectable()`: Kiểm tra khả năng lựa chọn phương án.
-- `QuoteService.getQuotes()`: Truy vấn báo giá.
-- `QuoteService.normalizeQuotes()`: Chuẩn hóa dữ liệu.
+**BR-05:** Phương án vận chuyển chỉ được lựa chọn khi đáp ứng điều kiện khả dụng và hiệu lực của Rate.
 
-### 3.2. UC-02 — Xác nhận và tạo vận đơn
+### 3.2. UC-02 — Tạo vận đơn
 
-**Các class liên quan:** `User`, `Rate`, `Shipment`, `BookingAttempt`, `ShipmentService`, `CarrierAdapter`, `BookingResult`.
+**BR-06:** Mỗi yêu cầu xác nhận tạo vận đơn sử dụng bookingKey duy nhất để hạn chế việc tạo vận đơn trùng lặp.
 
-**Quy tắc nghiệp vụ:**
+**BR-07:** bookingStatus có bốn trạng thái: PENDING, SUCCESS, FAILED và UNKNOWN.
 
-1. Người dùng phải lựa chọn một `Rate` hợp lệ trước khi xác nhận tạo vận đơn.
-2. Một `User` có thể sở hữu nhiều `Shipment`; mỗi vận đơn thuộc một người dùng.
-3. Một `Rate` có thể được tham chiếu bởi nhiều `Shipment` theo mô hình hiện tại.
-4. `Shipment.bookingKey` là khóa duy nhất dùng để hạn chế tạo vận đơn trùng.
-5. Một `Shipment` có thể ghi nhận nhiều `BookingAttempt`.
-6. Mỗi `BookingAttempt` thuộc đúng một `Shipment`.
-7. Hệ thống không gửi đồng thời nhiều yêu cầu tạo đơn cho cùng một `bookingKey`.
-8. `BookingStatus` có bốn giá trị:
-   - `PENDING`: Đang xử lý.
-   - `SUCCESS`: Carrier đã xác nhận tạo vận đơn.
-   - `FAILED`: Carrier từ chối rõ ràng.
-   - `UNKNOWN`: Chưa xác định được kết quả do timeout hoặc lỗi kết nối.
-9. Khi booking ở trạng thái `UNKNOWN`, `ShipmentService` cần kiểm tra kết quả từ carrier trước khi quyết định retry.
-10. Không tự retry khi chưa xác minh được carrier đã tạo vận đơn hay chưa.
-11. `BookingStatus` thể hiện kết quả tạo vận đơn, khác với `ShipmentStatus` thể hiện tiến trình vận chuyển.
+**BR-08:** Khi hãng trả kết quả thành công có căn cứ và hệ thống lưu vận đơn an toàn, bookingStatus được chuyển thành SUCCESS.
 
-**Phương thức tiêu biểu:**
+**BR-09:** Khi hãng từ chối rõ ràng, bookingStatus được chuyển thành FAILED.
 
-- `Shipment.markBookingUnknown()`: Đánh dấu kết quả booking chưa xác định.
-- `Shipment.confirmBooking()`: Ghi nhận kết quả carrier xác nhận.
-- `BookingAttempt.recordResponse()`: Ghi nhận phản hồi booking.
-- `ShipmentService.createShipment()`: Điều phối tạo vận đơn.
-- `ShipmentService.checkCarrierBeforeRetry()`: Kiểm tra kết quả carrier trước khi thử lại.
+**BR-10:** Khi timeout, mất kết nối hoặc phản hồi không đủ căn cứ xác nhận, bookingStatus phải là UNKNOWN, không được tự kết luận SUCCESS hoặc FAILED.
 
-### 3.3. UC-03 — Theo dõi vận chuyển
+**BR-11:** Với bookingStatus UNKNOWN, VietGo cần xác minh kết quả với hãng trước khi quyết định thử lại.
 
-**Các class liên quan:** `User`, `Shipment`, `TrackingEvent`, `ShipmentStatus`, `TrackingService`.
+**BR-12:** Không được tạo nhiều yêu cầu booking đồng thời cho cùng một lần xác nhận.
 
-**Quy tắc nghiệp vụ:**
+**BR-13:** Theo ràng buộc D03 đã thống nhất, một Rate được tham chiếu bởi tối đa một Shipment.
 
-1. Người dùng chỉ được xem những `Shipment` mà mình có quyền truy cập.
-2. Một `Shipment` có thể có nhiều `TrackingEvent`.
-3. Mỗi `TrackingEvent` thuộc một `Shipment` cụ thể.
-4. `TrackingEvent.carrierStatus` lưu trạng thái gốc từ hãng vận chuyển.
-5. `TrackingEvent.normalizedStatus` biểu diễn trạng thái sau khi chuẩn hóa, nếu nhận diện được.
-6. `ShipmentStatus` lưu danh mục trạng thái vận chuyển chung.
-7. Một `Shipment` có thể tham chiếu trạng thái vận chuyển hiện tại khi có dữ liệu.
-8. Nếu API lỗi hoặc không nhận diện được trạng thái mới, hệ thống không tự chuyển vận đơn sang trạng thái `Đã giao`.
-9. Lịch sử vận chuyển có thể chưa có sự kiện, ngay cả khi vận đơn đã được tạo.
+### 3.3. UC-03 — Theo dõi vận đơn
 
-**Phương thức tiêu biểu:**
+**BR-14:** Người dùng chỉ được xem vận đơn mà mình có quyền truy cập.
 
-- `User.canAccess()`: Kiểm tra quyền truy cập.
-- `TrackingEvent.normalize()`: Chuẩn hóa trạng thái.
-- `ShipmentStatus.isTerminal()`: Kiểm tra trạng thái kết thúc.
-- `TrackingService.getCurrentStatus()`: Xem trạng thái hiện tại.
-- `TrackingService.getHistory()`: Xem lịch sử vận chuyển.
+**BR-15:** TrackingEvent phải lưu thông tin trạng thái gốc từ hãng để phục vụ đối chiếu và kiểm tra.
 
-### 3.4. UC-04 — Xem thông tin COD
+**BR-16:** Trạng thái vận chuyển được chuẩn hóa thông qua ShipmentStatus.
 
-**Class liên quan:** `Shipment`.
+**BR-17:** Khi gặp mã trạng thái chưa được nhận diện, VietGo không tự suy đoán trạng thái mới.
 
-**Quy tắc nghiệp vụ:**
+**BR-18:** bookingStatus và shipmentStatus là hai khái niệm độc lập. Tạo vận đơn thành công không đồng nghĩa với giao hàng thành công.
 
-1. `Shipment.codAmount` biểu diễn số tiền yêu cầu thu hộ.
-2. COD không phải cước vận chuyển và không được gộp với phí giao hàng.
-3. Thông tin COD cần được hiển thị dựa trên dữ liệu đáng tin cậy.
-4. Không suy luận COD đã thu hoặc đã đối soát chỉ vì vận đơn có trạng thái `Đã giao`.
-5. Trong phạm vi MVP P0, VietGo không trực tiếp thu, chuyển hoặc đối soát tiền COD.
+### 3.4. UC-04 — Thông tin COD
 
-**Lưu ý thiết kế:** Class `Shipment` trong sơ đồ hiện tại có thuộc tính `codAmount`, nhưng **chưa khai báo `codStatus`**. Vì vậy, sơ đồ thể hiện số tiền COD; trạng thái thu hộ từ carrier cần được bổ sung trong thiết kế nếu nhóm muốn mô hình hóa chi tiết hơn.
+**BR-19:** Shipment lưu số tiền COD yêu cầu thu hộ.
 
-### 3.5. UC-05 — RepeatBox (P1)
+**BR-20:** Thông tin COD do hãng cung cấp phải được thể hiện theo dữ liệu thực tế nhận được.
 
-**Các class liên quan:** `User`, `ShipmentTemplate`, `RepeatPlan`, `RepeatOccurrence`, `RateRequest`, `Shipment`, `RepeatBoxService`.
+**BR-21:** Không tự kết luận COD đã thu hoặc đã đối soát khi chưa có dữ liệu xác nhận.
 
-**Quy tắc nghiệp vụ:**
+**BR-22:** Trong phạm vi MVP, VietGo không trực tiếp thực hiện thu hộ, chuyển tiền hoặc đối soát COD thay hãng vận chuyển.
 
-1. Một `User` có thể sở hữu nhiều `ShipmentTemplate`.
-2. Một `ShipmentTemplate` có thể được nhiều `RepeatPlan` sử dụng.
-3. Mỗi `RepeatPlan` thuộc một mẫu đơn cụ thể.
-4. `RepeatPlan` hỗ trợ chu kỳ `WEEKLY` hoặc `MONTHLY`.
-5. `RepeatPlan` có các trạng thái `ACTIVE`, `PAUSED` và `ENDED`.
-6. Một `RepeatPlan` có thể sinh nhiều `RepeatOccurrence`.
-7. Cần bảo đảm mỗi cặp `(repeatPlanId, scheduledFor)` chỉ phát sinh một kỳ gửi.
-8. `RepeatBoxService` chỉ tạo bản nháp nội bộ khi đến lịch.
-9. Không tự động gọi GHN/GHTK để tạo vận đơn khi đến kỳ.
-10. Người dùng cần lấy báo giá mới thông qua `RateRequest` trước khi xác nhận gửi.
-11. `RepeatOccurrence` chỉ liên kết với `Shipment` khi booking đã thành công.
-12. Người dùng có thể bỏ qua một kỳ gửi bằng trạng thái `SKIPPED`.
+### 3.5. UC-05 — RepeatBox P1
 
-**Phương thức tiêu biểu:**
+**BR-23:** Mỗi RepeatPlan được tạo từ một ShipmentTemplate thuộc quyền sở hữu hợp lệ của người dùng.
 
-- `ShipmentTemplate.updateSnapshot()`: Cập nhật dữ liệu mẫu.
-- `RepeatPlan.pause()`: Tạm dừng kế hoạch.
-- `RepeatPlan.resume()`: Tiếp tục kế hoạch.
-- `RepeatOccurrence.markSkipped()`: Bỏ qua kỳ gửi.
-- `RepeatOccurrence.linkShipment()`: Liên kết vận đơn.
-- `RepeatBoxService.createDraftForDuePlan()`: Tạo bản nháp theo lịch.
-- `RepeatBoxService.skipOccurrence()`: Bỏ qua kỳ gửi.
+**BR-24:** Mỗi kỳ gửi được biểu diễn bằng RepeatOccurrence.
 
----
+**BR-25:** Cặp giá trị (repeatPlanId, scheduledFor) phải duy nhất để tránh tạo trùng kỳ gửi.
 
-## 4. Các quan hệ UML trong Class Diagram
+**BR-26:** Scheduler chỉ tạo bản nháp nội bộ và không tự gọi API booking.
+
+**BR-27:** Người dùng phải kiểm tra thông tin, lấy báo giá mới và xác nhận trước khi tạo vận đơn.
+
+**BR-28:** RepeatOccurrence chỉ được liên kết với Shipment khi việc tạo vận đơn đã được xác nhận thành công.
+
+### 3.6. UC-06 — Tiếp nhận và xử lý khiếu nại
+
+**BR-29 — Quyền tạo khiếu nại**
+
+Chỉ người dùng có quyền truy cập vận đơn mới được tạo khiếu nại liên quan đến vận đơn đó.
+
+Mỗi Complaint phải liên kết với một Shipment tồn tại trong hệ thống.
+
+**BR-30 — Kiểm tra thông tin**
+
+Trước khi tạo khiếu nại, ComplaintService phải kiểm tra dữ liệu bắt buộc như lý do, nội dung mô tả và vận đơn liên quan.
+
+Nếu dữ liệu không hợp lệ, hệ thống từ chối yêu cầu và thông báo nội dung cần chỉnh sửa.
+
+**BR-31 — Quản lý bằng chứng**
+
+Mỗi Complaint có thể chứa nhiều ComplaintEvidence.
+
+Tệp bằng chứng cần được kiểm tra định dạng, kích thước và điều kiện hợp lệ trước khi chấp nhận.
+
+Bằng chứng phải được liên kết với đúng Complaint.
+
+**BR-32 — Tạo phiếu khiếu nại**
+
+Sau khi dữ liệu được xác thực, hệ thống tạo Complaint và lưu thông tin qua ComplaintRepository.
+
+Phiếu khiếu nại có định danh nội bộ của VietGo, độc lập với mã ticket do hãng vận chuyển cung cấp.
+
+**BR-33 — Quản lý trạng thái**
+
+Complaint.status biểu diễn trạng thái xử lý khiếu nại.
+
+Các trạng thái nghiệp vụ đề xuất gồm:
+
+- OPEN: Khiếu nại đã được tạo.
+- IN_REVIEW: CSKH đang kiểm tra.
+- NEED_MORE_INFO: Cần bổ sung thông tin hoặc chứng từ.
+- FORWARDED: Đã chuyển yêu cầu đến hãng.
+- RESOLVED: Đã có kết quả xử lý.
+- CLOSED: Khiếu nại đã đóng.
+
+Đây là bộ trạng thái đề xuất cho VietGo, cần đồng bộ với D03 và quy trình BPMN WF-06 trước khi triển khai.
+
+**BR-34 — Lịch sử xử lý**
+
+Mọi thay đổi trạng thái quan trọng và hoạt động xử lý khiếu nại cần được ghi nhận bằng ComplaintHistory.
+
+Lịch sử có thể bao gồm hành động, trạng thái trước và sau, thời điểm cập nhật và người thực hiện.
+
+Không được xóa lịch sử nghiệp vụ chỉ vì Complaint đã đóng.
+
+**BR-35 — Chuyển tiếp khiếu nại GHN**
+
+Với vận đơn GHN, CarrierSupportGateway có thể tích hợp API ticket chính thức của GHN khi hệ thống có token và quyền truy cập phù hợp.
+
+Các thao tác tích hợp bao gồm tạo ticket, tra cứu chi tiết, phản hồi và tiếp nhận callback theo tài liệu API được xác minh.
+
+Mã ticket do GHN cung cấp được lưu trong carrierTicketId khi có dữ liệu hợp lệ.
+
+**BR-36 — Chuyển tiếp khiếu nại GHTK**
+
+Với vận đơn GHTK, hệ thống sử dụng quy trình chuyển tiếp qua CSKH và kênh hỗ trợ chính thức của GHTK.
+
+Do chưa xác minh API khiếu nại công khai của GHTK, VietGo không tự tạo hoặc giả định endpoint khiếu nại cho hãng.
+
+CSKH có trách nhiệm ghi nhận việc chuyển tiếp và cập nhật phản hồi vào VietGo.
+
+**BR-37 — Xử lý lỗi và timeout**
+
+Khi yêu cầu đến hãng thất bại, timeout hoặc chưa nhận được phản hồi, hệ thống phải giữ lại Complaint và thông tin xử lý đã lưu.
+
+Không được thông báo đã chuyển tiếp thành công khi chưa có căn cứ.
+
+Trường hợp chưa rõ kết quả phải được kiểm tra trước khi gửi lại nhằm hạn chế tạo ticket trùng.
+
+**BR-38 — Xử lý bất đồng bộ**
+
+Việc hãng vận chuyển tiếp nhận và phản hồi khiếu nại có thể diễn ra sau thời điểm VietGo tạo Complaint.
+
+VietGo cần hỗ trợ cập nhật trạng thái trong những lần xử lý tiếp theo mà không yêu cầu người dùng gửi lại toàn bộ khiếu nại.
+
+**BR-39 — Đóng khiếu nại**
+
+Complaint chỉ được chuyển sang CLOSED khi đáp ứng điều kiện đóng theo quy trình nghiệp vụ.
+
+Trước khi đóng, kết quả xử lý phải được lưu và lịch sử cập nhật phải được ghi nhận.
+
+**BR-40 — Phân quyền CSKH**
+
+Người dùng thông thường được tạo và theo dõi khiếu nại thuộc quyền của mình.
+
+Nhân viên CSKH được tiếp nhận, yêu cầu bổ sung chứng từ, chuyển tiếp và cập nhật trạng thái theo quyền được cấp.
+
+Các thao tác cập nhật phải được kiểm tra quyền ở phía backend.
+
+## 4. UML Relationships
 
 ### 4.1. Association
 
-Association biểu diễn mối liên hệ giữa hai class bằng đường liền.
+Association thể hiện mối liên hệ giữa các đối tượng trong hệ thống.
 
-| Quan hệ | Multiplicity | Ý nghĩa |
-|---|---|---|
-| User — RateRequest | `1 — 0..*` | Người dùng tạo yêu cầu báo giá |
-| QuoteAttempt — Carrier | `0..* — 1` | Mỗi lần tra cứu thuộc một hãng |
-| Carrier — CarrierService | `1 — 0..*` | Hãng cung cấp nhiều dịch vụ |
-| CarrierService — Rate | `1 — 0..*` | Dịch vụ có thể xuất hiện trong nhiều báo giá |
-| User — Shipment | `1 — 0..*` | Người dùng sở hữu vận đơn |
-| Rate — Shipment | `1 — 0..*` | Vận đơn được tạo dựa trên phương án đã chọn |
-| Shipment — ShipmentStatus | `0..* — 0..1` | Vận đơn tham chiếu trạng thái hiện tại |
-| TrackingEvent — ShipmentStatus | `0..* — 0..1` | Sự kiện có thể được ánh xạ sang trạng thái chuẩn |
-| User — ShipmentTemplate | `1 — 0..*` | Người dùng sở hữu các mẫu RepeatBox |
-| ShipmentTemplate — RepeatPlan | `1 — 0..*` | Kế hoạch sử dụng mẫu đơn |
-| RepeatOccurrence — Shipment | `0..1 — 0..1` | Kỳ lặp liên kết vận đơn sau booking thành công |
-| RepeatOccurrence — RateRequest | `0..1 — 0..1` | Kỳ lặp liên kết yêu cầu báo giá mới |
+| Class A | Class B | Multiplicity | Tên quan hệ |
+|---|---|---|---|
+| User | RateRequest | 1 — 0..* | creates |
+| Carrier | CarrierService | 1 — 0..* | provides |
+| CarrierService | Rate | 1 — 0..* | offered in |
+| User | Shipment | 1 — 0..* | owns |
+| Rate | Shipment | 1 — 0..1 | selected for |
+| User | ShipmentTemplate | 1 — 0..* | owns |
+| ShipmentTemplate | RepeatPlan | 1 — 0..* | used by |
+| User | Complaint | 1 — 0..* | submits |
+| Shipment | Complaint | 1 — 0..* | has complaints |
+
+Một User có thể gửi nhiều Complaint. Mỗi Complaint thuộc về một User và liên kết với đúng một Shipment.
 
 ### 4.2. Composition
 
-Composition biểu diễn quan hệ toàn thể – thành phần, sử dụng đường liền và hình thoi đen tại phía class sở hữu.
+Composition biểu diễn quan hệ sở hữu thành phần trong mô hình nghiệp vụ.
 
-| Class sở hữu | Thành phần | Multiplicity |
+| Class chủ | Class thành phần | Multiplicity | Tên quan hệ |
+|---|---|---|---|
+| RateRequest | Parcel | 1 — 0..1 | has |
+| Parcel | ParcelItem | 1 — 0..* | contains |
+| RateRequest | QuoteAttempt | 1 — 0..* | logs |
+| QuoteAttempt | Rate | 1 — 0..* | returns |
+| Shipment | BookingAttempt | 1 — 0..* | records |
+| Shipment | TrackingEvent | 1 — 0..* | has history |
+| RepeatPlan | RepeatOccurrence | 1 — 0..* | schedules |
+| Complaint | ComplaintEvidence | 1 — 0..* | has evidence |
+| Complaint | ComplaintHistory | 1 — 0..* | records history |
+
+Trong Class Diagram, hình thoi đen của hai quan hệ ComplaintEvidence và ComplaintHistory được đặt tại phía Complaint.
+
+Quan hệ Composition mô tả sở hữu trong mô hình đối tượng; không đồng nghĩa với việc được phép xóa vĩnh viễn bằng chứng hoặc lịch sử trong cơ sở dữ liệu. Quy định lưu trữ và xóa dữ liệu phải được xác định riêng.
+
+### 4.3. Directed Association
+
+| Nguồn | Đích | Multiplicity | Tên quan hệ |
+|---|---|---|---|
+| QuoteAttempt | Carrier | 0..* → 1 | for |
+| Shipment | ShipmentStatus | 0..* → 0..1 | current status |
+| TrackingEvent | ShipmentStatus | 0..* → 0..1 | mapped to |
+| RepeatOccurrence | Shipment | 0..1 → 0..1 | links after success |
+| RepeatOccurrence | RateRequest | 0..1 → 0..1 | re-quotes via |
+
+### 4.4. Dependency
+
+Dependency là quan hệ phụ thuộc, thể hiện bằng đường nét đứt có đầu mũi tên mở hướng về thành phần được sử dụng.
+
+| Class nguồn | Class đích | Tên quan hệ |
 |---|---|---|
-| RateRequest | Parcel | `1 — 0..1` |
-| Parcel | ParcelItem | `1 — 0..*` |
-| RateRequest | QuoteAttempt | `1 — 0..*` |
-| QuoteAttempt | Rate | `1 — 0..*` |
-| Shipment | BookingAttempt | `1 — 0..*` |
-| Shipment | TrackingEvent | `1 — 0..*` |
-| RepeatPlan | RepeatOccurrence | `1 — 0..*` |
+| QuoteService | CarrierAdapter | uses |
+| ShipmentService | CarrierAdapter | uses |
+| TrackingService | CarrierAdapter | uses |
+| RepeatBoxService | RepeatPlan | manages |
+| RepeatBoxService | RepeatOccurrence | creates |
+| CarrierAdapter | BookingResult | returns |
+| ComplaintService | Complaint | manages |
+| ComplaintService | ComplaintRepository | uses |
+| ComplaintService | CarrierSupportGateway | forwards via |
+| ComplaintRepository | Complaint | persists |
 
-**Lưu ý:** Composition thể hiện quan hệ sở hữu về mặt thiết kế đối tượng, không mặc nhiên yêu cầu xóa dây chuyền dữ liệu trong CSDL.
+ComplaintService chịu trách nhiệm điều phối nghiệp vụ, ComplaintRepository quản lý lưu trữ, còn CarrierSupportGateway đóng vai trò tích hợp với hệ thống hỗ trợ của hãng.
 
-### 4.3. Dependency
-
-Dependency sử dụng đường nét đứt có mũi tên, thể hiện một class cần sử dụng class khác.
-
-| Class sử dụng | Class được sử dụng |
-|---|---|
-| QuoteService | CarrierAdapter |
-| ShipmentService | CarrierAdapter |
-| TrackingService | CarrierAdapter |
-| RepeatBoxService | RepeatPlan |
-| RepeatBoxService | RepeatOccurrence |
-| CarrierAdapter | BookingResult |
-
-### 4.4. Realization
-
-Realization được thể hiện bằng đường nét đứt, đầu tam giác rỗng hướng về interface.
+### 4.5. Realization
 
 | Class triển khai | Interface |
 |---|---|
 | GHNAdapter | CarrierAdapter |
 | GHTKAdapter | CarrierAdapter |
 
-Hai adapter triển khai giao diện chung, giúp VietGo xử lý khác biệt giữa API của GHN và GHTK mà không cần thay đổi logic nghiệp vụ cốt lõi.
+Realization được thể hiện bằng đường nét đứt và tam giác rỗng hướng về interface.
 
----
+### 4.6. Quy tắc đọc multiplicity
 
-## 5. Quy ước thiết kế UML
+- `1`: Đúng một đối tượng.
+- `0..1`: Không có hoặc có tối đa một đối tượng.
+- `0..*`: Không có hoặc có nhiều đối tượng.
 
-### 5.1. Cấu trúc class
+Ví dụ: `Shipment 1 — 0..* Complaint` nghĩa là một Shipment có thể có nhiều khiếu nại, nhưng mỗi Complaint liên kết với đúng một Shipment.
 
-Mỗi class được chia thành ba phần:
+## 5. Mapping giữa Class Diagram và ERD D03
 
-1. Tên class.
-2. Danh sách thuộc tính và kiểu dữ liệu.
-3. Danh sách phương thức, tham số và kiểu trả về.
+### 5.1. Đồng bộ dữ liệu hiện có
 
-**Ký hiệu quyền truy cập:**
+Một số thuộc tính được thống nhất với D03:
 
-- `-`: Private — thuộc tính hoặc phương thức nội bộ.
-- `+`: Public — phương thức có thể được sử dụng từ bên ngoài class.
-
-### 5.2. Multiplicity
-
-| Ký hiệu | Ý nghĩa |
+| Class / thuộc tính | Kiểu dữ liệu trong D04 |
 |---|---|
-| `1` | Đúng một đối tượng |
-| `0..1` | Không có hoặc một đối tượng |
-| `0..*` | Không có hoặc nhiều đối tượng |
+| User.userId | Long |
+| Shipment.shipmentId | Long |
+| Rate.rateId | Long |
+| Shipment.userId | Long |
+| Shipment.rateId | Long |
+| BookingAttempt.shipmentId | Long |
+| Shipment.shipmentStatus | String? |
+| ShipmentStatus.statusCode | String |
 
-Multiplicity được ghi ở hai đầu quan hệ Association và Composition.
+Định danh của các class khác cần được kiểm tra với schema.dbml tương ứng. Không tự đổi toàn bộ UUID sang Long nếu chưa có căn cứ từ D03.
 
-### 5.3. Kiểu dữ liệu
+### 5.2. Mapping dữ liệu UC-06
 
-Sơ đồ sử dụng các kiểu dữ liệu ở mức thiết kế, bao gồm:
+Complaint Module dự kiến sử dụng ba bảng mới trong D03:
 
-- `UUID`: Định danh đối tượng trong mô hình hiện tại.
-- `String`: Chuỗi ký tự.
-- `Integer`: Số nguyên.
-- `Decimal`: Số thập phân.
-- `Boolean`: Giá trị đúng/sai.
-- `Date`: Ngày.
-- `DateTime`: Ngày và thời gian.
-
-**Lưu ý:** Kiểu `UUID` trong Class Diagram cần được đối chiếu với ERD D03 cuối cùng để bảo đảm thống nhất kiểu khóa chính và khóa ngoại.
-
----
-
-## 6. Đối chiếu với yêu cầu chức năng
-
-| Nhóm yêu cầu | Class liên quan |
+| Class | Bảng dữ liệu |
 |---|---|
-| FR-01 — Tài khoản | User, UserRole |
-| FR-02–08 — Báo giá và so sánh | RateRequest, Parcel, ParcelItem, QuoteAttempt, Rate, Carrier, CarrierService, QuoteService |
-| FR-09–12, FR-17 — Tạo vận đơn | Shipment, BookingAttempt, BookingStatus, ShipmentService |
-| FR-13–15 — Theo dõi vận chuyển | Shipment, TrackingEvent, ShipmentStatus, TrackingService |
-| FR-16 — COD | Shipment |
-| FR-19–24 — RepeatBox P1 | ShipmentTemplate, RepeatPlan, RepeatOccurrence, RepeatBoxService |
+| Complaint | complaint_tickets |
+| ComplaintEvidence | complaint_evidence |
+| ComplaintHistory | complaint_history |
 
----
+ComplaintService, ComplaintRepository và CarrierSupportGateway là các thành phần xử lý, truy xuất dữ liệu và tích hợp; không bắt buộc tương ứng với bảng dữ liệu riêng.
 
-## 7. Kết luận
+### 5.3. Các ràng buộc cần đồng bộ
 
-Class Diagram VietGo mô tả các thực thể nghiệp vụ, thành phần xử lý logic và lớp tích hợp với GHN/GHTK.
+- complaint_tickets.shipment_id tham chiếu đến shipments.shipment_id.
+- Mỗi Complaint thuộc về một vận đơn.
+- complaint_evidence.complaint_id liên kết với Complaint tương ứng.
+- complaint_history.complaint_id liên kết với Complaint tương ứng.
+- carrier_ticket_id được phép NULL để hỗ trợ trường hợp chưa có mã ticket từ hãng, đặc biệt là quy trình GHTK thủ công.
+- Các thay đổi trạng thái quan trọng phải được ghi vào lịch sử xử lý.
+- Dữ liệu khiếu nại phải được bảo vệ bằng kiểm tra quyền truy cập.
 
-Sơ đồ phân biệt rõ:
+Tên cột, khóa chính, kiểu ID và ràng buộc chi tiết cần được xác nhận lại theo phiên bản schema.dbml mới nhất do nhóm phụ trách D03 cung cấp.
 
-- **Domain Entity:** Lưu dữ liệu và quy tắc nghiệp vụ.
-- **Application Service:** Điều phối các chức năng chính.
-- **Carrier Adapter:** Tích hợp API vận chuyển.
-- **DTO:** Truyền kết quả giữa các thành phần.
-- **Enum:** Biểu diễn các giá trị và trạng thái.
-- **RepeatBox P1:** Phần mở rộng được tách khỏi nghiệp vụ MVP P0.
+## 6. Quy tắc tích hợp GHN và GHTK trong UC-06
 
-Việc kết hợp Association, Composition, Dependency và Realization giúp thể hiện cấu trúc và trách nhiệm của các lớp, đồng thời hỗ trợ phát triển tiếp Sequence Diagram và System Architecture.
+### 6.1. GHN
 
----
+VietGo hỗ trợ kết nối hệ thống ticket GHN thông qua CarrierSupportGateway.
 
-## 8. File bàn giao D04
+Những khả năng tích hợp được đưa vào thiết kế bao gồm:
+
+- Tạo ticket khiếu nại.
+- Tra cứu thông tin ticket.
+- Gửi phản hồi hoặc bổ sung.
+- Tiếp nhận callback cập nhật.
+
+Việc tích hợp thực tế phụ thuộc vào tài liệu API, token và quyền được GHN cấp.
+
+### 6.2. GHTK
+
+VietGo chưa xác nhận được API khiếu nại GHTK công khai.
+
+Do đó, quy trình được thiết kế theo phương án:
+
+1. VietGo tiếp nhận và lưu khiếu nại.
+2. Nhân viên CSKH kiểm tra nội dung.
+3. CSKH chuyển tiếp đến kênh hỗ trợ chính thức của GHTK.
+4. CSKH ghi nhận kết quả trao đổi.
+5. VietGo cập nhật trạng thái và lịch sử xử lý.
+
+Không xây dựng hoặc giả định một endpoint API khiếu nại GHTK chưa được xác minh.
+
+### 6.3. Nguyên tắc chung
+
+Complaint Module phải thống nhất cách lưu trữ và theo dõi khiếu nại, đồng thời cho phép các phương thức chuyển tiếp khác nhau theo từng hãng vận chuyển.
+
+Các phản hồi lỗi, timeout hoặc chưa có kết quả không được tự chuyển thành trạng thái xử lý thành công.
+
+## 7. Traceability — Liên kết yêu cầu và mô hình
+
+| Use Case | Class chính | Chức năng |
+|---|---|---|
+| UC-01 | RateRequest, Rate, QuoteAttempt, QuoteService | Báo giá và so sánh |
+| UC-02 | Shipment, BookingAttempt, ShipmentService | Tạo vận đơn |
+| UC-03 | TrackingEvent, ShipmentStatus, TrackingService | Theo dõi vận đơn |
+| UC-04 | Shipment | Thông tin COD |
+| UC-05 | ShipmentTemplate, RepeatPlan, RepeatOccurrence, RepeatBoxService | RepeatBox |
+| UC-06 | Complaint, ComplaintEvidence, ComplaintHistory, ComplaintService, ComplaintRepository, CarrierSupportGateway | Xử lý khiếu nại |
+
+Các mã FR, NFR và AC cụ thể cần đối chiếu với D01 và D02 đã cập nhật UC-06 để bảo đảm ma trận truy vết nhất quán.
+
+## 8. UML Conventions
+
+Class Diagram sử dụng các quy ước:
+
+- Dấu `-` biểu diễn thuộc tính hoặc phương thức private.
+- Dấu `+` biểu diễn phương thức public.
+- Association dùng đường liền.
+- Composition dùng đường liền và hình thoi đen ở phía class chủ.
+- Dependency dùng đường nét đứt với mũi tên mở.
+- Realization dùng đường nét đứt với tam giác rỗng hướng đến interface.
+- Multiplicity thể hiện số lượng đối tượng tham gia quan hệ.
+- Các class có stereotype `service`, `repository` hoặc `gateway` thể hiện trách nhiệm kiến trúc.
+
+Tên class sử dụng PascalCase; tên thuộc tính và phương thức sử dụng camelCase.
+
+## 9. Deliverables
+
+Cấu trúc file nộp D04:
 
 ```text
 docs/
@@ -352,11 +453,14 @@ docs/
     └── domain-rules.md
 ```
 
-- `domain-class.puml`: Mã nguồn UML Class Diagram.
-- `domain-rules.md`: Mô tả các class, quan hệ và quy tắc nghiệp vụ.
+Ngoài mã nguồn, Class Diagram cần được xuất thành hình ảnh PNG hoặc PDF để sử dụng trong báo cáo đồ án.
 
-**Tài liệu đối chiếu:**
+File domain-class.puml và domain-rules.md phải thống nhất về tên lớp, thuộc tính, kiểu dữ liệu, quan hệ và quy tắc nghiệp vụ.
 
-- Tài liệu nhóm VietGo: ĐỒ ÁN VIETGO, ERD, CUSTOMIZE, FR - NFR.
-- Use Case Specifications D02.
-- Template đồ án môn học: https://github.com/trinhtin/ec312/blob/main/project-template.md — mục 3.4 Class Diagram.
+## 10. Kết luận
+
+Class Diagram D04 của VietGo mô tả các thành phần nghiệp vụ, dịch vụ ứng dụng và tích hợp GHN/GHTK trong một mô hình thống nhất.
+
+Việc bổ sung Complaint Module cho UC-06 giúp VietGo quản lý vòng đời khiếu nại, lưu bằng chứng và lịch sử xử lý, hỗ trợ chuyển tiếp đến GHN thông qua API chính thức hoặc GHTK qua CSKH.
+
+Thiết kế giữ nguyên các chức năng hiện có, mở rộng theo hướng phân tách trách nhiệm giữa Domain, Application Service, Repository và Gateway, đồng thời cần được đồng bộ với ERD D03, Use Case D02 và quy trình BPMN WF-06 trước khi triển khai.
