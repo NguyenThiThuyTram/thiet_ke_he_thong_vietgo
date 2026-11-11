@@ -12,6 +12,8 @@
 | BR-06 | Duy trì hoạt động tra cứu đa hãng | VIETGO cần hạn chế gián đoạn tra cứu khi một hãng vận chuyển không phản hồi. |
 | BR-07 | Hỗ trợ giám sát vận hành | VIETGO cần giúp quản trị viên nhận biết và theo dõi lỗi tích hợp với các hãng vận chuyển. |
 | BR-08 | Giảm thao tác lặp lại khi gửi hàng định kỳ | VIETGO cần hỗ trợ shop chuẩn bị đơn gửi theo tuần hoặc tháng thông qua bản nháp RepeatBox trước khi xác nhận tạo vận đơn. |
+| BR-09 | Quản lý khiếu nại vận chuyển tập trung | VietGo cần giúp người gửi ghi nhận và theo dõi khiếu nại liên quan đến vận đơn GHN/GHTK ngay trong nền tảng; bộ phận CSKH VietGo tiếp nhận và chuyển tiếp qua kênh phù hợp mà không cam kết tự động xử lý bồi thường. |
+
 
 ## 2.1. Các yêu cầu người dùng (User Requirements)
 
@@ -31,6 +33,10 @@
 | UR-12 | Quản lý lịch gửi định kỳ | Chủ shop cần tạo lịch theo tuần/tháng, xem, tạm dừng và tiếp tục kế hoạch. |
 | UR-13 | Kiểm tra bản nháp định kỳ | Chủ shop cần kiểm tra, điều chỉnh hoặc bỏ qua bản nháp của kỳ gửi. |
 | UR-14 | Xác nhận vận đơn từ bản nháp | Chủ shop cần nhận báo giá mới và xác nhận trước khi tạo vận đơn thật từ bản nháp. |
+| UR-15 | Tạo khiếu nại vận đơn | Là người gửi hàng, tôi cần chọn vận đơn của mình, mô tả vấn đề và cung cấp chứng từ để đề nghị hỗ trợ. |
+| UR-16 | Xem và bổ sung khiếu nại | Là người gửi hàng, tôi cần xem trạng thái/lịch sử và bổ sung thông tin khi được CSKH yêu cầu. |
+| UR-17 | Tiếp nhận và xử lý khiếu nại | Là nhân viên CSKH, tôi cần xem, phân loại, phản hồi, chuyển tiếp đến GHN qua API ticket hoặc GHTK qua kênh hỗ trợ và cập nhật kết quả có lưu vết. |
+
 
 ## 2.2. Các yêu cầu chức năng (Functional Requirements)
 
@@ -46,6 +52,10 @@
 | FR-08 | Thông báo lỗi và giám sát tích hợp | Hệ thống phải thông báo khi tra cứu báo giá hoặc tạo vận đơn thất bại; đồng thời cho phép quản trị viên xem danh sách vận đơn, trạng thái tích hợp và lỗi API. |
 | FR-09 | Quản lý lịch gửi hàng định kỳ RepeatBox | Hệ thống phải cho phép người dùng lưu mẫu thông tin gửi hàng, tạo kế hoạch gửi theo tuần hoặc tháng, xem lịch, tạm dừng và tiếp tục kế hoạch. |
 | FR-10 | Tạo và xử lý bản nháp RepeatBox | Khi một kỳ gửi đến hạn, hệ thống phải tạo tối đa một bản nháp tương ứng; cho phép người dùng kiểm tra, bỏ qua, yêu cầu báo giá mới và xác nhận tạo vận đơn. Hệ thống chỉ liên kết vận đơn với kỳ gửi sau khi hãng xác nhận tạo thành công; không tự động tạo vận đơn thật khi chưa có xác nhận của người dùng. |
+| FR-11 | Tạo yêu cầu khiếu nại vận chuyển | Hệ thống phải cho phép người gửi tạo khiếu nại đối với vận đơn VietGo thuộc quyền sở hữu, chọn loại vấn đề (DELAYED, LOST, DAMAGED, OTHER), nhập mô tả và đính kèm chứng từ hợp lệ; kiểm tra quyền, dữ liệu và chống gửi trùng; tạo mã ticket VietGo và lưu lịch sử khởi tạo. |
+| FR-12 | Xem và bổ sung thông tin khiếu nại | Hệ thống phải cho phép người gửi xem danh sách, chi tiết, trạng thái và lịch sử xử lý các ticket thuộc quyền sở hữu; bổ sung thông tin hoặc chứng từ khi CSKH yêu cầu, có kiểm tra quyền và lưu vết cập nhật. |
+| FR-13 | Tiếp nhận và xử lý khiếu nại | Hệ thống phải cho phép nhân viên CSKH tiếp nhận, phân loại, yêu cầu bổ sung chứng từ, phản hồi, cập nhật trạng thái và kết thúc ticket theo phân quyền; mọi thao tác xử lý phải được ghi nhận trong lịch sử khiếu nại. |
+| FR-14 | Chuyển tiếp khiếu nại đến hãng vận chuyển | Hệ thống phải hỗ trợ chuyển khiếu nại đến GHN qua Ticket API chính thức khi có quyền truy cập, lưu mã ticket hãng và cập nhật phản hồi qua API/callback khi có; đối với GHTK, CSKH chuyển tiếp thủ công qua kênh hỗ trợ và ghi nhận lịch sử. Khi API lỗi, bị từ chối hoặc timeout, hệ thống phải giữ ticket VietGo, không tự xác nhận thành công hoặc gửi lại khi chưa xác minh kết quả. |
 
 ## 2.3. Các yêu cầu phi chức năng (Non-functional Requirements)
 
@@ -56,3 +66,6 @@
 | NFR-03 | Duy trì khả năng chịu lỗi và hạn chế trùng vận đơn | Hệ thống phải tiếp tục hiển thị các báo giá hợp lệ nếu một hãng vận chuyển gặp lỗi; không được thông báo tạo vận đơn thành công khi kết quả API chưa xác định và phải áp dụng biện pháp hạn chế gửi yêu cầu tạo vận đơn trùng lặp. |
 | NFR-04 | Bảo đảm tính toàn vẹn và nhất quán dữ liệu | Hệ thống phải duy trì tính nhất quán của báo giá, cước phí, ETA, trạng thái vận đơn và COD; không tự suy diễn giá trị thiếu; không được tạo nhiều hơn một bản nháp RepeatBox cho cùng một kế hoạch và kỳ gửi. |
 | NFR-05 | Hỗ trợ bảo trì và tương thích thiết bị | Hệ thống phải tổ chức phần tích hợp GHN và GHTK thành các thành phần độc lập, có cơ chế chuẩn hóa dữ liệu và ghi nhận lỗi tích hợp; giao diện website phải sử dụng được trên máy tính, máy tính bảng và điện thoại. |
+| NFR-06 | Đảm bảo phân quyền và bảo vệ dữ liệu khiếu nại | Hệ thống phải kiểm tra quyền đối với 100% yêu cầu truy cập ticket và chứng từ; người gửi chỉ được truy cập dữ liệu thuộc mình, nhân viên CSKH thao tác theo vai trò được cấp; file đính kèm phải được kiểm tra loại, kích thước và bảo vệ truy cập. |
+| NFR-07 | Đảm bảo tính toàn vẹn và khả năng truy vết khiếu nại | Hệ thống phải ghi nhận lịch sử tạo ticket, thay đổi trạng thái, bổ sung chứng từ, chuyển tiếp hãng và phản hồi kèm nguồn, người thực hiện, thời gian; xử lý callback/phản hồi lặp để tránh ghi nhận trùng; trạng thái khiếu nại phải độc lập với trạng thái vận đơn và COD. |
+| NFR-08 | Đảm bảo khả năng chịu lỗi khi tích hợp xử lý khiếu nại | Khi GHN từ chối, timeout hoặc chưa xác định kết quả, hệ thống phải duy trì ticket VietGo và ghi nhận chính xác trạng thái chuyển tiếp; không tự gửi lại yêu cầu có nguy cơ tạo trùng. Việc xử lý khiếu nại GHTK qua kênh hỗ trợ thủ công không được thể hiện như tích hợp API thực tế. |
