@@ -2,7 +2,8 @@
 
 **Phạm vi:** MVP P0 · **Actor chính:** Người gửi hàng · **Hệ thống tích hợp:** GHN/GHTK  
 **Sơ đồ đi kèm:** `usecase-overview.puml`  
-**Lưu ý:** P1 (RepeatBox, hủy vận đơn, quản trị, webhook) được phân biệt trên sơ đồ tổng thể và không nằm trong bốn đặc tả bắt buộc.
+**Lưu ý:** UC-01 đến UC-04 thuộc MVP P0; UC-05 (RepeatBox) và UC-06 (Tiếp nhận và xử lý khiếu nại vận chuyển) thuộc P1. Các chức năng hủy vận đơn, quản trị và webhook được phân biệt trên sơ đồ tổng thể theo phạm vi đã thống nhất.
+
 
 ## UC-01 — Báo giá và so sánh
 
@@ -170,7 +171,7 @@
 | **Pre-conditions** | Người gửi đã đăng nhập, có quyền quản lý mẫu/kế hoạch; dữ liệu mẫu và chu kỳ gửi hợp lệ. |
 | **Trigger** | Người gửi tạo kế hoạch hoặc đến lịch xử lý kỳ gửi của một kế hoạch đang hoạt động. |
 | **Post-conditions** | Có kế hoạch và tối đa một bản nháp nội bộ cho mỗi kỳ hợp lệ; chỉ tạo vận đơn hãng khi người gửi chủ động xác nhận UC-02. |
-| **FR / AC liên quan** | P1: SI-13; BR-09; UR-15/UR-16; FR-19–FR-24; NFR-15/NFR-16; AC-10–AC-16 (đối chiếu tab CUSTOMIZE). |
+| **FR / AC liên quan** | P1: SI-13; BR-08; UR-11–UR-14; FR-19–FR-24; NFR-15/NFR-16; AC-10–AC-16 (đối chiếu tab CUSTOMIZE). |
 
 ### Main Flow
 1. Người gửi nhập hoặc chọn mẫu gồm người gửi, người nhận, kiện hàng và COD (nếu có).
