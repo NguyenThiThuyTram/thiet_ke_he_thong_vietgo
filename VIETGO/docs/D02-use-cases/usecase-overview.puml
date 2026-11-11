@@ -15,6 +15,8 @@ skinparam packageStyle rectangle
 actor "Người gửi hàng" as U3
 actor "Quản trị viên" as U4
 actor "GHN / GHTK\n(API bên ngoài)" as U5
+' Bosung
+actor "Nhân viên CSKH" as U6
 
 rectangle "HỆ THỐNG VIETGO" {
   package "TÀI KHOẢN - P0" {
@@ -58,6 +60,14 @@ rectangle "HỆ THỐNG VIETGO" {
     usecase "Yêu cầu hủy vận đơn" as U45
     usecase "Nhận webhook trạng thái" as U46
     usecase "Quản trị / xem lỗi API" as U47
+    ' Bosung
+    usecase "UC-06\nTiếp nhận và xử lý khiếu nại" as U48
+    usecase "Tạo yêu cầu khiếu nại" as U49
+    usecase "Xem trạng thái khiếu nại" as U50
+    usecase "Kiểm tra và tiếp nhận khiếu nại" as U51
+    usecase "Chuyển khiếu nại đến carrier" as U52
+    usecase "Cập nhật kết quả xử lý" as U53
+    usecase "Bổ sung thông tin / bằng chứng" as U54
   }
 }
 
@@ -72,6 +82,11 @@ U3 -- U32
 U3 -- U35
 U3 -- U40
 U3 -- U45
+'nguoi gui hang
+U3 -- U48
+U3 -- U49 
+U3 -- U50 
+U3 -- U54 
 U4 -- U18
 U4 -- U19
 U4 -- U47
@@ -80,6 +95,13 @@ U5 -- U27
 U5 -- U34
 U5 -- U38
 U5 -- U46
+' Hang van chuyen
+U5 -- U52 
+' NV CSKH
+U6 -- U48 
+U6 -- U51 
+U6 -- U52 
+U6 -- U53 
 U20 ..> U21 : <<include>>
 U20 ..> U22 : <<include>>
 U24 ..> U25 : <<include>>
@@ -97,4 +119,11 @@ U37 ..> U35 : <<extend>>
 U44 ..> U40 : <<extend>>
 U40 ..> U43 : <<include>>
 
+' UC-06 - Các chức năng bắt buộc
+U48 ..> U51 : <<include>>
+U48 ..> U52 : <<include>>
+U48 ..> U53 : <<include>>
+
+' UC-06 - Các chức năng phát sinh theo điều kiện
+U54 ..> U51 : <<extend>>
 @enduml
