@@ -62,11 +62,12 @@
 | AC-14 | Báo giá lại trước khi tạo vận đơn | Khi mở bản nháp để tiếp tục quy trình gửi hàng, hệ thống phải lấy báo giá mới trước khi người dùng xác nhận tạo vận đơn. | SI-13 |
 | AC-15 | Tạm dừng kế hoạch và bỏ qua kỳ | Kế hoạch đã tạm dừng không phát sinh kỳ mới; kỳ đã bỏ qua không tự động xuất hiện lại như một kỳ cần xử lý. | SI-13 |
 | AC-16 | Liên kết kỳ gửi với vận đơn | Chỉ liên kết kỳ gửi với vận đơn khi có kết quả tạo vận đơn hợp lệ. Trường hợp thất bại hoặc chưa xác định kết quả không được ghi nhận là thành công. | SI-13 |
-| AC-17 | Phân quyền khiếu nại | Shop chỉ tạo và xem ticket đối với vận đơn thuộc quyền sở hữu. |
-| AC-18 | Lưu ticket nội bộ | Ticket lưu mã VietGo, shipment_id, loại vấn đề, mô tả và lịch sử thao tác ngay cả khi chưa chuyển hãng. |
-| AC-19 | Kiểm tra dữ liệu và chứng từ | Dữ liệu/file không hợp lệ bị từ chối có lý do; CSKH có thể yêu cầu bổ sung chứng từ. |
-| AC-20 | Xử lý GHN Ticket API | Chỉ ghi nhận mã ticket GHN khi phản hồi hợp lệ; timeout hoặc kết quả chưa rõ không được tự ghi thành công hoặc tự gửi lại mù. |
-| AC-21 | Chuyển tiếp GHTK thủ công | Lịch sử thể hiện chuyển tiếp và phản hồi thủ công, không gán nhãn đã sử dụng API GHTK. |
-| AC-22 | Theo dõi và cập nhật ticket | Shop và CSKH xem được trạng thái, lịch sử; các thao tác cập nhật có phân quyền và lưu vết. |
-| AC-23 | Chống trùng và độc lập trạng thái | Callback/phản hồi lặp không tạo lịch sử trùng; ticket không làm thay đổi trạng thái vận đơn hoặc đối soát COD. |
+| AC-17 | Phân quyền khiếu nại | Shop chỉ tạo và xem ticket đối với vận đơn thuộc quyền sở hữu. | SI-14 |
+| AC-18 | Lưu ticket nội bộ | Ticket lưu mã VietGo, shipment_id, loại vấn đề, mô tả và lịch sử thao tác ngay cả khi chưa chuyển hãng. | SI-14 |
+| AC-19 | Kiểm tra dữ liệu và chứng từ | Dữ liệu/file không hợp lệ bị từ chối có lý do; CSKH có thể yêu cầu bổ sung chứng từ. | SI-14 |
+| AC-20 | Xử lý GHN Ticket API | Chỉ ghi nhận mã ticket GHN khi phản hồi hợp lệ; timeout hoặc kết quả chưa rõ không được tự ghi thành công hoặc tự gửi lại mù. | SI-14 |
+| AC-21 | Chuyển tiếp GHTK thủ công | Lịch sử thể hiện chuyển tiếp và phản hồi thủ công, không gán nhãn đã sử dụng API GHTK. | SI-14 |
+| AC-22 | Theo dõi và cập nhật ticket | Shop và CSKH xem được trạng thái, lịch sử; các thao tác cập nhật có phân quyền và lưu vết. | SI-14 |
+| AC-23 | Chống trùng và độc lập trạng thái | Callback/phản hồi lặp không tạo lịch sử trùng; ticket không làm thay đổi trạng thái vận đơn hoặc đối soát COD. | SI-14 |
+
 
