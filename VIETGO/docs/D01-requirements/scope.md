@@ -16,7 +16,8 @@
 | SI-10 | Quản trị hệ thống cơ bản | Admin xem danh sách đơn, trạng thái tích hợp và lỗi API | P1 |
 | SI-11 | Hủy vận đơn | Cho phép gửi yêu cầu hủy qua API nếu trạng thái và chính sách hãng cho phép | P1 |
 | SI-12 | Đồng bộ trạng thái tự động | Tiếp nhận webhook và lưu lịch sử thay đổi trạng thái đơn | P1 |
-| SI-13 | Quản lý kế hoạch gửi hàng định kỳ – RepeatBox | Cho phép lưu mẫu đơn, thiết lập chu kỳ gửi theo tuần/tháng, tự tạo bản nháp nội bộ khi đến hạn, xem danh sách và lịch sử các kỳ gửi, bỏ qua kỳ, tạm dừng/tiếp tục kế hoạch và xác nhận gửi thông qua quy trình hiện có. | P1 |
+| SI-13 | RepeatBox – chuẩn bị đơn định kỳ | Cho phép shop tạo và quản lý mẫu đơn, thiết lập lịch gửi theo tuần/tháng, tự tạo bản nháp theo kỳ và yêu cầu người gửi xác nhận trước khi tạo vận đơn thật. | P1 |
+| SI-14 | Tiếp nhận và xử lý khiếu nại vận chuyển | Cho phép shop tạo ticket gắn với vận đơn thuộc quyền sở hữu, bổ sung chứng từ và theo dõi tiến độ. CSKH VietGo tiếp nhận, chuyển tiếp đến GHN qua Ticket API khi có quyền hoặc GHTK qua kênh hỗ trợ thủ công, cập nhật phản hồi và kết quả. | P1 |
 
 
 ## 2. Scope Out — Phạm vi không triển khai
@@ -32,11 +33,11 @@
 | SO-07 | Thanh toán trực tuyến và ví điện tử | Không tích hợp cổng thanh toán trực tuyến hoặc ví điện tử trong phạm vi hiện tại. |
 | SO-08 | Tự động thu hộ, chuyển tiền và đối soát COD | Chỉ quản lý thông tin COD do hãng cung cấp; không xây dựng nghiệp vụ tài chính tự động. |
 | SO-09 | Báo cáo tài chính chuyên sâu | Không xây dựng hệ thống báo cáo tài chính toàn diện. |
-| SO-10 | Quản lý khiếu nại, bồi thường và hoàn hàng phức tạp | Phụ thuộc quy trình và chính sách của hãng. |
+| SO-10 | Bồi thường tự động, xử lý tài chính và hoàn hàng phức tạp | VietGo không tự quyết định bồi thường, xử lý tài chính, hoàn hàng phức tạp hoặc cam kết kết quả của hãng. Quy trình ticket khiếu nại cơ bản thuộc SI-14 vẫn nằm trong phạm vi P1. |
 | SO-11 | Ứng dụng Android/iOS riêng | Ưu tiên website responsive. |
 | SO-12 | Tích hợp trực tiếp với Shopee, TikTok Shop và WooCommerce | Không thuộc mục tiêu tích hợp của MVP hiện tại. |
 | SO-13 | Quản lý nhiều kho và nhiều chi nhánh | Không triển khai hệ thống quản lý đa kho/chi nhánh trong phạm vi hiện tại. |
-| SO-14 | CRM nâng cao | Không triển khai hệ thống chăm sóc khách hàng nâng cao. |
+| SO-14 | CRM và tổng đài CSKH nâng cao | VietGo không xây dựng hệ thống CRM hoặc tổng đài CSKH nâng cao; chỉ cung cấp giao diện quản lý ticket và lịch sử xử lý khiếu nại cho nhân viên CSKH. |
 | SO-15 | Tự động tạo vận đơn từ kế hoạch RepeatBox | RepeatBox chỉ tạo bản nháp nội bộ. Người dùng phải mở bản nháp, lấy báo giá mới và xác nhận theo quy trình hiện có trước khi tạo vận đơn. |
 | SO-16 | Thu tiền thuê bao RepeatBox | Không triển khai thanh toán phí thuê bao hoặc mô hình thu phí định kỳ cho RepeatBox. |
 | SO-17 | Quản lý sản phẩm và tồn kho trong RepeatBox | Mẫu đơn chỉ lưu thông tin cần thiết cho việc gửi hàng; không trở thành hệ thống quản lý catalog, sản phẩm hoặc tồn kho. |
@@ -61,3 +62,11 @@
 | AC-14 | Báo giá lại trước khi tạo vận đơn | Khi mở bản nháp để tiếp tục quy trình gửi hàng, hệ thống phải lấy báo giá mới trước khi người dùng xác nhận tạo vận đơn. | SI-13 |
 | AC-15 | Tạm dừng kế hoạch và bỏ qua kỳ | Kế hoạch đã tạm dừng không phát sinh kỳ mới; kỳ đã bỏ qua không tự động xuất hiện lại như một kỳ cần xử lý. | SI-13 |
 | AC-16 | Liên kết kỳ gửi với vận đơn | Chỉ liên kết kỳ gửi với vận đơn khi có kết quả tạo vận đơn hợp lệ. Trường hợp thất bại hoặc chưa xác định kết quả không được ghi nhận là thành công. | SI-13 |
+| AC-17 | Phân quyền khiếu nại | Shop chỉ tạo và xem ticket đối với vận đơn thuộc quyền sở hữu. |
+| AC-18 | Lưu ticket nội bộ | Ticket lưu mã VietGo, shipment_id, loại vấn đề, mô tả và lịch sử thao tác ngay cả khi chưa chuyển hãng. |
+| AC-19 | Kiểm tra dữ liệu và chứng từ | Dữ liệu/file không hợp lệ bị từ chối có lý do; CSKH có thể yêu cầu bổ sung chứng từ. |
+| AC-20 | Xử lý GHN Ticket API | Chỉ ghi nhận mã ticket GHN khi phản hồi hợp lệ; timeout hoặc kết quả chưa rõ không được tự ghi thành công hoặc tự gửi lại mù. |
+| AC-21 | Chuyển tiếp GHTK thủ công | Lịch sử thể hiện chuyển tiếp và phản hồi thủ công, không gán nhãn đã sử dụng API GHTK. |
+| AC-22 | Theo dõi và cập nhật ticket | Shop và CSKH xem được trạng thái, lịch sử; các thao tác cập nhật có phân quyền và lưu vết. |
+| AC-23 | Chống trùng và độc lập trạng thái | Callback/phản hồi lặp không tạo lịch sử trùng; ticket không làm thay đổi trạng thái vận đơn hoặc đối soát COD. |
+
