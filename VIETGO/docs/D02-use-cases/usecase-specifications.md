@@ -198,3 +198,54 @@
 - **E5 – Kế hoạch đã tạm dừng/hủy:** Không tạo nháp mới cho kỳ bị chặn.
 
 **Business Rules / NFR:** RepeatBox chỉ lập lịch và tạo bản nháp P1; không tự đặt vận đơn GHN/GHTK, không giữ giá báo cũ, không tạo kỳ/bản nháp trùng. Scheduler là thành phần nội bộ, không phải actor ngoài hệ thống.
+
+---
+
+## UC-06 — Tiếp nhận và xử lý khiếu nại vận chuyển (P1)
+
+| Trường | Nội dung |
+|---|---|
+| **Use Case ID** | UC-06 · WF-06 · P1 |
+| **Use Case Name** | Tiếp nhận và xử lý khiếu nại vận chuyển |
+| **Actors** | Chính: Người gửi hàng (Shop). Phụ: Nhân viên CSKH VietGo; GHN/GHTK (đối tác bên ngoài). |
+| **Preconditions** | Người gửi đã đăng nhập; vận đơn tồn tại trên VietGo và thuộc quyền sở hữu của người gửi. CSKH có quyền xử lý ticket theo vai trò được cấp. |
+| **Trigger** | Người gửi chọn **Tạo khiếu nại** tại một vận đơn thuộc quyền sở hữu. |
+| **Postconditions** | Ticket VietGo được tạo và lưu lịch sử với trạng thái phù hợp. Kết quả xử lý được cập nhật khi có căn cứ; không tự thay đổi trạng thái vận đơn hoặc COD. |
+| **FR/AC liên quan** | SI-14; BR-09; UR-15–UR-17; FR-25–FR-28; NFR-17–NFR-19; AC-17–AC-23. |
+
+### Main Flow
+
+1. Người gửi mở danh sách vận đơn, chọn vận đơn cần khiếu nại và nhấn **Tạo khiếu nại**.
+2. Người gửi chọn loại vấn đề (`DELAYED`, `LOST`, `DAMAGED`, `OTHER`), nhập mô tả và đính kèm chứng từ nếu có.
+3. VietGo xác thực tài khoản, kiểm tra quyền sở hữu vận đơn, dữ liệu bắt buộc, định dạng/kích thước file và yêu cầu gửi trùng.
+4. VietGo tạo ticket trong `complaint_tickets` với trạng thái `OPEN`, ghi lịch sử khởi tạo và trả mã ticket VietGo cho người gửi.
+5. Nhân viên CSKH tiếp nhận, phân loại và chuyển ticket sang trạng thái `IN_REVIEW`.
+6. Khi thông tin đầy đủ, CSKH chuyển tiếp khiếu nại đến hãng tương ứng: GHN qua Ticket API chính thức nếu có quyền hoặc GHTK qua kênh hỗ trợ thủ công.
+7. VietGo ghi nhận kết quả chuyển tiếp hợp lệ, lưu mã ticket hãng nếu được cấp và chuyển trạng thái sang `WAITING_CARRIER` khi chờ phản hồi.
+8. VietGo/CSKH tiếp nhận phản hồi từ hãng qua API/callback GHN (nếu được cấu hình) hoặc cập nhật thủ công phản hồi GHTK; lưu nội dung vào `complaint_history`.
+9. CSKH kiểm tra kết quả và cập nhật `RESOLVED` nếu đã giải quyết hoặc `REJECTED` nếu có kết quả từ chối.
+10. Khi xác nhận hoàn tất xử lý, CSKH chuyển ticket sang `CLOSED`; VietGo lưu lịch sử và hiển thị trạng thái, kết quả cho người gửi.
+
+### Alternate Flow
+
+- **A1 — Thiếu thông tin/chứng từ:** Tại bước 5, CSKH yêu cầu bổ sung và chuyển ticket sang `WAITING_CUSTOMER`. Người gửi bổ sung thông tin/chứng từ; VietGo kiểm tra, lưu lịch sử và CSKH tiếp tục xử lý.
+- **A2 — Chuyển tiếp GHN:** Tại bước 6, khi có quyền API, VietGo gọi `POST /shiip/public-api/ticket/create`. Chỉ lưu mã ticket GHN khi có phản hồi hợp lệ. Việc phản hồi bổ sung, tra cứu hoặc nhận callback được thực hiện qua API tương ứng khi được hỗ trợ.
+- **A3 — Chuyển tiếp GHTK:** Tại bước 6, CSKH liên hệ kênh hỗ trợ chính thức của GHTK; ghi nhận kênh liên hệ, thời gian, nội dung trao đổi và mã tham chiếu nếu có. Không ghi nhận là đã tích hợp API GHTK.
+- **A4 — Người gửi theo dõi khiếu nại:** Người gửi mở danh sách/chi tiết ticket thuộc quyền sở hữu; VietGo hiển thị trạng thái và lịch sử xử lý. Khi được CSKH yêu cầu, người gửi có thể bổ sung chứng từ.
+- **A5 — Hãng chưa phản hồi:** Ticket duy trì `WAITING_CARRIER`; CSKH tiếp tục theo dõi, cập nhật lịch sử và không tự kết luận đã giải quyết.
+
+### Exception Flow
+
+- **E1 — Không có quyền sở hữu vận đơn:** VietGo từ chối tạo hoặc xem ticket, không tiết lộ dữ liệu của tài khoản khác.
+- **E2 — Dữ liệu hoặc file không hợp lệ:** Thông báo rõ lý do, yêu cầu chỉnh sửa và không tạo ticket từ dữ liệu không hợp lệ.
+- **E3 — Gửi yêu cầu trùng:** VietGo trả về ticket hiện hữu hoặc chặn yêu cầu gửi lặp; không tạo nhiều ticket cho cùng một lần gửi.
+- **E4 — GHN từ chối yêu cầu:** Giữ ticket VietGo, lưu phản hồi lỗi và thông báo CSKH xử lý tiếp; không ghi nhận hãng đã tiếp nhận.
+- **E5 — GHN timeout hoặc chưa xác định kết quả:** Giữ ticket VietGo, không tự đánh dấu tạo ticket hãng thành công và không tự gửi lại; cần tra cứu hoặc xác minh trước.
+- **E6 — Không có quyền sử dụng GHN Ticket API:** Không gọi API khi chưa được cấp quyền; giữ ticket nội bộ và chuyển CSKH xử lý qua kênh phù hợp.
+- **E7 — GHTK chưa có API khiếu nại được xác minh:** CSKH chuyển tiếp thủ công qua kênh hỗ trợ chính thức và ghi lịch sử.
+- **E8 — Callback hoặc phản hồi lặp:** VietGo xử lý chống trùng, không ghi nhiều lịch sử cho cùng một sự kiện.
+- **E9 — Không lưu được ticket hoặc lịch sử:** VietGo thông báo thao tác chưa hoàn tất, ghi nhận lỗi và không trả kết quả tạo thành công khi dữ liệu chưa được lưu hợp lệ.
+
+**Business Rules / NFR:** Chỉ cho phép khiếu nại vận đơn thuộc quyền sở hữu; mỗi lần gửi yêu cầu hợp lệ tạo tối đa một ticket VietGo nhưng một vận đơn có thể có nhiều khiếu nại khác nhau. Ticket carrier ID có thể để trống. Trạng thái `ComplaintStatus` gồm `OPEN`, `IN_REVIEW`, `WAITING_CUSTOMER`, `WAITING_CARRIER`, `RESOLVED`, `REJECTED`, `CLOSED`, độc lập với `ShipmentStatus`, `BookingStatus` và COD. Không tự đóng ticket khi vận đơn `DELIVERED`, không tự bồi thường hoặc cam kết kết quả từ hãng. Mọi thao tác phải được phân quyền, bảo vệ chứng từ và lưu lịch sử có nguồn, người thực hiện, thời gian. NFR-17/18/19.
+
+**Traceability:** SI-14 → BR-09 → UR-15–UR-17 → FR-25–FR-28 → AC-17–AC-23 → UC-06; BPMN WF-06; Sequence SEQ-03.
