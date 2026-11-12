@@ -1,18 +1,17 @@
 # D05 — BPMN + Process Description | VIETGO
 
-**Phiên bản cập nhật:** 26/10/2026  
-**Phạm vi chỉnh sửa:** Đồng bộ tên Start/End Event và Task theo `WF01-quote(1).bpmn` và `WF02-create-shipment(1).bpmn`; làm rõ ánh xạ giữa sơ đồ và bảng Process Description. **Không thay đổi luồng xử lý, gateway, pool/lane, business rule hoặc exception.**  
-**Căn cứ nghiệp vụ kế thừa:** FR/NFR nhóm chốt (10 FR, 5 NFR), D02 Use Cases bản chốt và template D05 — theo `process-spec.md` gốc. Các tài liệu FR/NFR, D02 không được đính kèm trong lần cập nhật này, nên mã tham chiếu dưới đây được giữ từ bản cũ, chưa được kiểm tra độc lập.
+**Tài liệu:** Đặc tả quy trình nghiệp vụ D05 của hệ thống VietGo.
+**Cơ sở đặc tả:** Các quy trình BPMN WF-01, WF-02, WF-03 và bộ yêu cầu nghiệp vụ FR/NFR của dự án.
 
 ## 1. Thông tin chung
 
 | Mục | Thông tin |
 | --- | --- |
 | Tên output | D05 — BPMN + Process Description (VietGo) |
-| Phạm vi | P0: 2 quy trình WF-01 (UC-01) và WF-02 (UC-02). RepeatBox UC-05 thuộc P1, không vẽ riêng trong D05. |
-| File BPMN đối chiếu | `WF01-quote(1).bpmn`, `WF02-create-shipment(1).bpmn` |
-| File mô tả quy trình | `process-spec-updated.md` |
-| Cách phân lane | Trong pool VietGo có hai lane **Người gửi hàng** và **Hệ thống VietGo**. GHN/GHTK là pool ngoài, kết nối qua message flow. |
+| Phạm vi | WF-01 (UC-01), WF-02 (UC-02) và WF-03 (xử lý khiếu nại). RepeatBox UC-05 thuộc P1, không vẽ riêng trong D05. |
+| File BPMN đối chiếu | `WF01-quote.bpmn`, `WF02-create-shipment.bpmn`, `WF03-complaint-handling.bpmn` |
+| File mô tả quy trình | `process-spec.md` |
+| Cách phân lane | Các lane/participant được xác định theo từng sơ đồ BPMN; WF-03 có sự tham gia của CSKH VietGo. GHN/GHTK là các đối tác vận chuyển bên ngoài, giao tiếp qua message flow khi được thể hiện trên sơ đồ. |
 | Quy ước nhãn | **Event** mang tên sự kiện/kết quả, không có tiền tố “Bắt đầu” / “Kết thúc”. **Task** có tên ngắn, ưu tiên động từ + đối tượng. Phần nghiệp vụ chi tiết giữ trong các cột Input/Output, Business Rule và Exception. |
 | Giới hạn | Không suy diễn endpoint/payload carrier, thời hạn hiệu lực Rate, thuật toán chống trùng, cơ chế xác minh hoặc retry an toàn. |
 
@@ -155,25 +154,80 @@
 | E2 | Timeout/mất kết nối | Đặt UNKNOWN, giữ key/attempts; xác minh trước retry; không thể xác minh → thủ công. |
 | E3 | Phản hồi thiếu căn cứ hoặc lỗi lưu | Không báo hoàn tất; ghi dấu vết và xử lý khôi phục an toàn. |
 
-## 4. Quy tắc và giới hạn nghiệp vụ (kế thừa từ bản cũ)
+## 4. WF-03 — Tiếp nhận và xử lý khiếu nại vận chuyển
+
+**Tiền điều kiện:** Người gửi có vận đơn cần khiếu nại và cung cấp thông tin liên quan.  
+**Trigger:** VietGo nhận yêu cầu khiếu nại từ người gửi.  
+**Hậu điều kiện:** Khiếu nại được thông báo kết quả sau khi có phản hồi, hoặc thông báo trạng thái chuyển tiếp thất bại nếu không chuyển được đến hãng sau xử lý.
+
+### 4.1. Start/End Event (tên khớp BPMN)
+
+| BPMN ID | Loại | Tên hiển thị | Ý nghĩa |
+| --- | --- | --- | --- |
+| `Start_Complaint` | Start Event | **Nhận khiếu nại** | Khởi động xử lý yêu cầu gửi từ pool Người gửi hàng. |
+| `End_Invalid` | End Event | **Kết thúc yêu cầu lỗi** | Dữ liệu/quyền không hợp lệ; đã gửi yêu cầu sửa. |
+| `Event_Wait` | Intermediate Catch Event | **Chờ cập nhật tiếp theo** | Chưa có kết quả từ hãng; chờ rồi quay lại theo dõi. |
+| `End_Close` | End Event | **Kết thúc xử lý** | Đã gửi thông báo trạng thái/kết quả cho người gửi. |
+
+### 4.2. Process Description — các Task
+
+> Tên **Action** và BPMN ID lấy trực tiếp từ file `WF03-complaint-handling.bpmn`. Các Input/Output, Business Rule và Exception là mô tả nghiệp vụ tương ứng với luồng đang vẽ; không mặc định rằng GHN/GHTK hỗ trợ API xử lý khiếu nại giống nhau.
+
+| Bước | BPMN ID | Actor/Lane | Action | Input | Output | Business Rule | Exception |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 01 | `Task_Validate` | Hệ thống VietGo | **Kiểm tra quyền và dữ liệu** | Yêu cầu khiếu nại, thông tin người gửi, mã vận đơn, nội dung/bằng chứng | Kết quả kiểm tra hợp lệ/không hợp lệ | Chỉ tiếp nhận khiếu nại gắn với vận đơn mà người gửi có quyền thao tác; kiểm tra dữ liệu bắt buộc | Sai/thiếu thông tin hoặc không đủ quyền → `Task_Invalid`. |
+| 02 (E1) | `Task_Invalid` | Hệ thống VietGo | **Thông báo yêu cầu sửa** | Lỗi xác thực hoặc dữ liệu | Thông báo yêu cầu chỉnh sửa gửi người gửi | Không tạo ticket khi chưa hợp lệ | Kết thúc tại `End_Invalid`; người gửi gửi lại yêu cầu đã sửa. |
+| 03 | `Task_Create` | Hệ thống VietGo | **Tạo ticket VietGo (OPEN)** | Khiếu nại hợp lệ và vận đơn liên quan | Ticket nội bộ ở trạng thái OPEN | Gắn ticket với vận đơn, người gửi và lịch sử xử lý | Không tạo ticket trùng do gửi lặp nếu hệ thống đã nhận diện cùng yêu cầu. |
+| 04 | `Task_Review` | CSKH VietGo | **CSKH tiếp nhận và kiểm tra** | Ticket OPEN, nội dung và chứng từ hiện có | Kết quả rà soát hồ sơ | CSKH đánh giá thông tin đủ để chuyển hãng hay cần bổ sung | Thiếu chứng từ → `Task_RequestEvidence`. |
+| 05 (A1) | `Task_RequestEvidence` | CSKH VietGo | **Yêu cầu bổ sung** | Danh sách thông tin/chứng từ còn thiếu | Yêu cầu bổ sung gửi người gửi | Nêu rõ tài liệu cần bổ sung trước khi chuyển hãng | Chờ người gửi bổ sung; chưa chuyển hãng. |
+| 06 (A1) | `Task_ReceiveEvidence` | CSKH VietGo | **Nhận chứng từ bổ sung** | Tài liệu người gửi cung cấp | Hồ sơ ticket được bổ sung | Đưa hồ sơ quay lại `Task_Review` để kiểm tra | Vẫn thiếu → có thể yêu cầu bổ sung tiếp theo gateway. |
+| 07 (GHN) | `Task_GHN` | Hệ thống VietGo | **Gửi ticket GHN qua API** | Ticket đủ điều kiện, mã vận đơn và dữ liệu khiếu nại | Phản hồi chuyển ticket GHN hoặc lỗi/chưa rõ | Nhánh GHN sử dụng API như thể hiện trên BPMN; chỉ xác nhận chuyển thành công khi có căn cứ phản hồi | API lỗi, từ chối hoặc timeout → nhánh xử lý chuyển tiếp không thành công/chưa rõ. |
+| 08 (GHTK) | `Task_GHTK` | CSKH VietGo | **CSKH liên hệ hỗ trợ GHTK** | Ticket đủ điều kiện, mã vận đơn và nội dung khiếu nại | Kết quả liên hệ/chuyển tiếp đến GHTK | Nhánh GHTK được CSKH chuyển tiếp thủ công, không mô tả là API | Không liên hệ/chuyển tiếp được hoặc chưa có xác nhận → nhánh xử lý lỗi chuyển tiếp. |
+| 09 (E2) | `Task_Escalate` | CSKH VietGo | **CSKH xác minh chuyển tiếp** | Kết quả chuyển tiếp không thành công/chưa rõ | Thông tin xác minh trạng thái chuyển tiếp | Phân biệt chưa rõ kết quả với chuyển tiếp thất bại thực sự | Không xác minh được → tiếp tục bước xử lý lỗi chuyển tiếp. |
+| 10 (E2) | `Activity_06r3hla` | CSKH VietGo | **Xử lý lỗi chuyển tiếp** | Lỗi API/liên hệ hoặc thông tin chưa xác định | Kết quả xử lý, cơ sở đánh giá có chuyển tiếp được hay không | Chỉ chuyển sang theo dõi hãng khi xác nhận đã chuyển tiếp được | Không khắc phục được → cập nhật thất bại. |
+| 11 (E2) | `Activity_075pdzr` | CSKH VietGo | **Cập nhật trạng thái chuyển tiếp thất bại** | Kết quả xử lý lỗi vẫn không chuyển được | Ticket ghi nhận chuyển tiếp thất bại | Không coi khiếu nại đã được hãng tiếp nhận nếu chưa chuyển được | Đi tới `Task_Notify` để thông báo trạng thái cho người gửi. |
+| 12 | `Task_Follow` | CSKH VietGo | **Theo dõi tiếp nhận và phản hồi từ hãng** | Ticket đã chuyển tiếp thành công; thông tin phản hồi GHN/GHTK | Tình trạng tiếp nhận và tiến độ giải quyết | Theo dõi theo đúng hãng đã nhận; chưa có kết quả thì tiếp tục chờ | Chưa có phản hồi cuối cùng → `Event_Wait` rồi theo dõi tiếp. |
+| 13 | `Task_Result` | CSKH VietGo | **Cập nhật kết quả và lịch sử** | Kết quả khiếu nại từ hãng | Kết quả và lịch sử xử lý trên ticket | Chỉ ghi kết quả theo thông tin đã nhận, giữ lịch sử xử lý | Không có kết quả → không đi nhánh này, tiếp tục theo dõi. |
+| 14 | `Task_Notify` | Hệ thống VietGo | **Thông báo trạng thái/kết quả khiếu nại** | Kết quả giải quyết hoặc trạng thái chuyển tiếp thất bại | Thông báo đến người gửi | Nội dung phải phản ánh đúng trạng thái thực tế; không thông báo giải quyết thành công khi chưa có kết quả | Thông báo xong → `End_Close`. |
+
+### 4.3. Gateway và các nhánh quyết định
+
+| BPMN ID | Tên Gateway trên BPMN | Điều kiện / hướng xử lý |
+| --- | --- | --- |
+| `Gateway_Valid` | Hợp lệ? | **Có** → `Task_Create`; **Không** → `Task_Invalid` → `End_Invalid`. |
+| `Gateway_Evidence` | Cần bổ sung? | **Có** → `Task_RequestEvidence` → `Task_ReceiveEvidence` → `Task_Review`; **Không** → `Gateway_Carrier`. |
+| `Gateway_Carrier` | Hãng nào? | **GHN** → `Task_GHN` (API); **GHTK** → `Task_GHTK` (CSKH liên hệ). |
+| `Gateway_Merge` | (Không có nhãn) | Hợp nhất hai nhánh lựa chọn hãng trước khi kiểm tra kết quả chuyển tiếp; đây là điểm gộp nhánh, không yêu cầu cả hai hãng cùng hoàn tất. |
+| `Gateway_Transfer` | Chuyển hãng thành công? | **Có** → `Task_Follow`; **Không / chưa rõ** → `Task_Escalate` → `Activity_06r3hla`. |
+| `Gateway_0gu66rn` | Chuyển tiếp được sau xử lý? | **Có** → `Task_Follow`; **Không** → `Activity_075pdzr` → `Task_Notify`. |
+| `Gateway_Result` | Đã có kết quả? | **Có** → `Task_Result` → `Task_Notify`; **Chưa** → `Event_Wait` → `Task_Follow`. |
+
+### 4.4. Alternate / Exception — WF-03
+
+| Mã | Điều kiện | Xử lý |
+| --- | --- | --- |
+| A1 | Hồ sơ chưa đủ chứng từ | CSKH yêu cầu người gửi bổ sung, nhận chứng từ và kiểm tra lại trước khi chuyển hãng. |
+| A2 | Khiếu nại thuộc GHN/GHTK | GHN: gửi ticket qua API; GHTK: CSKH liên hệ hỗ trợ thủ công. |
+| A3 | Hãng đã nhận nhưng chưa có kết quả | Chờ cập nhật, tiếp tục theo dõi; không tự kết luận khiếu nại đã xử lý xong. |
+| E1 | Người gửi không đủ quyền hoặc dữ liệu không hợp lệ | Thông báo yêu cầu sửa, kết thúc luồng yêu cầu lỗi. |
+| E2 | Chuyển tiếp thất bại hoặc chưa rõ | CSKH xác minh và xử lý lỗi; nếu chuyển được thì theo dõi, nếu không thì ghi nhận thất bại và thông báo. |
+
+## 5. Quy tắc và giới hạn nghiệp vụ
 
 - **Ánh xạ FR hiện hành theo bản nhóm chốt:** WF-01 liên quan FR-01 (dữ liệu đầu vào), FR-02 (Multi-Carrier Shipping Quotation), FR-03 (Shipping Rate Comparison & ETA), FR-08 (thông báo lỗi). WF-02 liên quan FR-01 (tài khoản), FR-04 (Shipment Booking), FR-08 (thông báo lỗi); FR-07 liên quan lưu thông tin COD và FR-05 liên quan xem chi tiết đơn.
-- **Không trộn mã FR giữa các phiên bản:** Tài liệu D02 trước đây dùng các mã chi tiết như FR-02–FR-08, FR-09–FR-12, FR-17 từ SRS cũ. Tài liệu này kế thừa mã FR-01–FR-10 theo bộ FR được nhóm chốt nêu trong `process-spec.md` cũ.
 - **WF-01:** Hai hãng được gọi độc lập; lỗi một hãng không chặn hãng kia. Phân biệt không có dịch vụ (A5) với lỗi cả hai API (E2). Không tự đoán ETA hoặc thay dữ liệu phí thiếu bằng 0.
 - **WF-02:** `booking_key` bất biến cho cùng một yêu cầu. `booking_status` gồm `PENDING`, `SUCCESS`, `FAILED`, `UNKNOWN`. Trạng thái `UNKNOWN` không đồng nghĩa `FAILED`; không tự động book lại khi PENDING/UNKNOWN.
 - **WF-02 — xác minh và retry:** Khi timeout, ghi UNKNOWN, giữ key và booking_attempts. Chỉ đối chiếu carrier bằng tham chiếu nếu hãng hỗ trợ. Chỉ retry khi hãng xác nhận chưa tạo **và** chứng minh được retry an toàn; nếu không thì giữ UNKNOWN để xử lý thủ công.
 - **NFR:** NFR-01 — timeout tối đa 10 giây/yêu cầu API báo giá hoặc tạo đơn. NFR-02 — bảo vệ token ở server. NFR-03 — tránh trùng booking, tránh báo thành công giả. NFR-04 — toàn vẹn dữ liệu. NFR-05 — tích hợp adapter độc lập, ghi lỗi.
-- **Phạm vi BPMN:** `booking_status` phản ánh trạng thái tạo đơn, khác `shipment_status` trong vận chuyển. Không đưa thanh toán trực tuyến, đối soát COD hoặc RepeatBox scheduler vào hai quy trình P0.
+- **Phạm vi BPMN:** `booking_status` phản ánh trạng thái tạo đơn, khác `shipment_status` trong vận chuyển. Không đưa thanh toán trực tuyến, đối soát COD hoặc RepeatBox scheduler vào phạm vi các quy trình được mô tả.
 
-## 5. Đối chiếu thay đổi và file bàn giao
+## 6. Tổng hợp các quy trình nghiệp vụ
 
-| Hạng mục | WF-01 | WF-02 |
-| --- | --- | --- |
-| Start/End Event | 1 Start + 3 End đã dùng tên sự kiện/kết quả, không có tiền tố “Bắt đầu/Kết thúc”. | 1 Start + 10 End đã dùng tên sự kiện/kết quả, không có tiền tố “Bắt đầu/Kết thúc”. |
-| Task | 15 Task, tên trên sơ đồ được trình bày nguyên văn ở §2.2. | 24 Task, tên trên sơ đồ được trình bày nguyên văn ở §3.2. |
-| Gateway | 6 Gateway, mô tả ở §2.3; không đổi tên/luồng. | 8 Gateway, mô tả ở §3.3; không đổi tên/luồng. |
-| Nội dung chi tiết | Business Rule và Exception được giữ ở các bảng mô tả. | Giữ các nhánh idempotency, UNKNOWN, xác minh và retry an toàn. |
+| Hạng mục | WF-01 — Tra cứu và so sánh báo giá | WF-02 — Tạo vận đơn | WF-03 — Xử lý khiếu nại |
+| --- | --- | --- | --- |
+| Sự kiện | 1 Start Event, 3 End Event | 1 Start Event, 10 End Event | 1 Start Event, 2 End Event, 1 Intermediate Catch Event |
+| Task | 15 Task | 24 Task | 14 Task |
+| Gateway | 6 Gateway | 8 Gateway | 7 Gateway |
+| Trọng tâm | Tra cứu hai hãng độc lập, so sánh Rate, xử lý lỗi tích hợp | Kiểm tra Rate, chống trùng booking, xác minh trạng thái chưa rõ | Tiếp nhận, xác thực, chuyển khiếu nại theo kênh GHN/GHTK, theo dõi và phản hồi |
 
-**Các file dùng để đối chiếu trong lần sửa này:** `WF01-quote(1).bpmn`, `WF02-create-shipment(1).bpmn`, `process-spec.md` (bản cũ).  
-**File kết quả:** `process-spec-updated.md`.  
-**Lưu ý bàn giao:** Bản cũ có liệt kê PNG/PDF và DOCX/PDF báo cáo; việc cập nhật lần này chỉ tạo file Markdown và không xác nhận các bản xuất đó đã được cập nhật theo tên mới.
+**Các sơ đồ BPMN tương ứng:** `WF01-quote.bpmn`, `WF02-create-shipment.bpmn`, `WF03-complaint-handling.bpmn`.
