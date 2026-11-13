@@ -1,0 +1,175 @@
+@startuml
+' Source: user's finalized SEQ03-complaint-VietGo(2).drawio
+' Output: D07 / SEQ03-complaint.puml
+title SEQ-03 | TIẾP NHẬN & XỬ LÝ KHIẾU NẠI VẬN CHUYỂN
+caption UC-06 • Complaint Module • GHN API / GHTK thủ công • Timeout & CSKH bất đồng bộ
+hide footbox
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam sequenceParticipantBackgroundColor #FFFFFF
+skinparam sequenceParticipantBorderColor #000000
+skinparam sequenceParticipantFontColor #000000
+skinparam sequenceActorBackgroundColor #FFFFFF
+skinparam sequenceActorBorderColor #000000
+skinparam sequenceActorFontColor #000000
+skinparam sequenceLifeLineBorderColor #000000
+skinparam sequenceLifeLineBackgroundColor #FFFFFF
+skinparam sequenceArrowColor #000000
+skinparam sequenceMessageFontColor #000000
+skinparam sequenceGroupBorderColor #000000
+skinparam sequenceGroupBackgroundColor #FFFFFF
+skinparam sequenceGroupHeaderBackgroundColor #FFFFFF
+skinparam sequenceGroupFontColor #000000
+skinparam noteBackgroundColor #FFFFFF
+skinparam noteBorderColor #000000
+skinparam noteFontColor #000000
+skinparam sequenceDividerBackgroundColor #FFFFFF
+skinparam sequenceDividerBorderColor #000000
+skinparam sequenceDividerFontColor #000000
+actor "Người gửi\nCustomer" as U
+boundary "VietGo Web UI" as UI
+control "ComplaintController" as CC
+control "ComplaintService" as CS
+database "ShipmentRepository" as SR
+database "ComplaintRepository" as CR
+participant "CSKH VietGo" as STAFF
+participant "CarrierSupportGateway" as GW
+participant "GHN Ticket API" as GHN
+participant "GHTK Support\n(manual channel)" as GHTK
+
+== 01 / TIẾP NHẬN VÀ TẠO TICKET NỘI BỘ ==
+U -> UI: Nhập lý do, mô tả, tải bằng chứng
+UI -> CC: POST /api/complaints (shipmentId, data, files)
+CC -> CS: createComplaint(userId, request)
+CS -> SR: findAuthorizedShipment(userId, shipmentId)
+SR --> CS: Shipment / NOT_FOUND / FORBIDDEN
+break [Không sở hữu vận đơn / không tồn tại]
+CS --> CC: FORBIDDEN / NOT_FOUND
+CC --> UI: HTTP 403 / 404
+UI --> U: Hiển thị lỗi và dừng tạo ticket
+end
+CS -> CS: validateComplaint(reason, evidence)
+break [Thiếu thông tin / file không hợp lệ]
+CS --> CC: ValidationError
+CC --> UI: HTTP 400 + lỗi dữ liệu
+UI --> U: Yêu cầu bổ sung / sửa file
+end
+CS -> CR: insertTicket(shipmentId, status=NEW, carrierTicketId=NULL)
+CR --> CS: ticketId
+CS -> CR: appendHistory(ticketId, CREATED)
+CS ->> STAFF: notifyNewTicket(ticketId) [async]
+CS --> CC: ticketId, status=NEW
+CC --> UI: HTTP 201 + ticket VietGo
+UI --> U: Hiển thị mã ticket nội bộ
+note over U,STAFF: Chuyển tiếp hãng diễn ra SAU HTTP 201. Ticket VietGo không đồng nghĩa carrier đã tiếp nhận.
+
+== 02 / CSKH TIẾP NHẬN VÀ KIỂM TRA KHÔNG ĐỒNG BỘ ==
+STAFF -> CC: openComplaint(ticketId)
+CC -> CS: getComplaintForStaff(ticketId)
+CS -> CR: findTicketWithEvidence(ticketId)
+CR --> CS: Ticket + evidence + history
+CS --> CC: ComplaintDetail
+CC --> STAFF: Hiển thị nội dung để kiểm tra
+opt [CSKH cần thêm chứng từ]
+STAFF -> CC: requestMoreEvidence(ticketId, note)
+CC -> CS: markNeedEvidence(ticketId, note)
+CS -> CR: updateStatus(WAITING_EVIDENCE) + appendHistory
+CS --> CC: Đã ghi nhận yêu cầu
+CC --> STAFF: Xác nhận yêu cầu bổ sung
+U -> UI: Mở ticket và bổ sung bằng chứng
+UI -> CC: POST /api/complaints/{id}/evidence
+CC -> CS: addEvidence(ticketId, files)
+CS -> CR: saveEvidence() + status(READY_FOR_REVIEW) + history
+CS ->> STAFF: notifyEvidenceReady(ticketId) [async]
+CS --> CC: EvidenceUpdated
+CC --> UI: HTTP 200
+UI --> U: Hiển thị cập nhật thành công
+end
+
+== 03 / CHUYỂN YÊU CẦU THEO HÃNG ==
+STAFF -> CC: Xác nhận chuyển tiếp ticket
+CC -> CS: forwardComplaint(ticketId)
+CS -> CR: getTicketCarrierAndEvidence(ticketId)
+CR --> CS: carrier = GHN hoặc GHTK
+alt [Carrier = GHN / sử dụng API khiếu nại]
+CS -> GW: createGHNTicket(ticketPayload)
+GW -> GHN: GHN Create Ticket API
+alt [GHN xác nhận tạo thành công]
+GHN --> GW: carrierTicketId + accepted
+GW --> CS: normalizedTicketResult
+CS -> CR: saveCarrierTicketId() + status(FORWARDED)
+CS -> CR: appendHistory(GHN_ACCEPTED)
+else [GHN từ chối rõ ràng]
+GHN --> GW: reject + reason
+GW --> CS: REJECTED + reason
+CS -> CR: status(NEEDS_REVIEW) + appendHistory
+else [GHN timeout / kết quả chưa xác định]
+GW --> CS: TIMEOUT / UNKNOWN
+CS -> CR: status(UNKNOWN) + appendHistory(GHN_TIMEOUT)
+CS ->> STAFF: notifyManualVerification(ticketId) [async]
+note over CS,GHN: Timeout là UNKNOWN. Không tự động gửi lại Create Ticket khi chưa xác minh yêu cầu trước.
+end
+
+else [Carrier = GHTK / chuyển tiếp CSKH thủ công]
+CS -> CR: status(WAITING_MANUAL) + appendHistory
+CS ->> STAFF: assignManualForward(ticketId) [async]
+STAFF -> GW: getOfficialSupportChannel(GHTK)
+GW --> STAFF: Thông tin kênh CSKH chính thức
+STAFF ->> GHTK: Chuyển khiếu nại qua CSKH (KHÔNG phải API)
+STAFF -> CC: recordManualForward(ticketId, supportRef?)
+CC -> CS: saveManualTransfer(ticketId, supportRef?)
+CS -> CR: status(FORWARDED_MANUAL) + appendHistory
+CS --> CC: Kết quả chuyển tiếp / chờ xử lý
+CC --> STAFF: Hiển thị trạng thái xử lý
+end
+
+== 04 / XÁC MINH GHN VÀ NHẬN PHẢN HỒI BẤT ĐỒNG BỘ ==
+opt [Sau GHN timeout: CSKH cần đối chiếu]
+STAFF -> GW: reconcileGHN(ticketId, carrierTicketId?)
+alt [Có carrierTicketId để tra cứu]
+GW -> GHN: GHN Ticket Detail API(carrierTicketId)
+GHN --> GW: Trạng thái hãng / chưa rõ
+GW --> STAFF: Kết quả đối chiếu
+else [Không có carrierTicketId]
+GW --> STAFF: Liên hệ GHN để xác minh thủ công
+end
+end
+
+opt [GHN callback / kết quả tra cứu có thể đối chiếu]
+GHN ->> GW: GHN Ticket Callback (async)
+GW ->> CS: handleGHNCallback(payload)
+CS -> CR: matchTicket + kiểm tra trùng sự kiện
+CR --> CS: ticketId + previousStatus
+CS -> CR: updateCarrierStatus() + appendHistory
+CS ->> STAFF: notifyUpdatedStatus(ticketId) [async]
+end
+
+opt [GHTK phản hồi sau qua CSKH]
+GHTK ->> STAFF: Phản hồi qua kênh hỗ trợ [manual]
+STAFF -> CC: PATCH /api/admin/complaints/{id}
+CC -> CS: updateManualResult(ticketId, outcome)
+CS -> CR: updateStatus() + appendHistory
+CS --> CC: Updated
+CC --> STAFF: Đã lưu kết quả
+end
+
+opt [CSKH xác nhận kết quả cuối cùng: đóng ticket]
+STAFF -> CC: closeComplaint(ticketId, resolution)
+CC -> CS: finalizeComplaint(ticketId, resolution)
+CS -> CR: status(CLOSED) + appendHistory(CLOSED)
+CS --> CC: Closed
+CC --> STAFF: Đã đóng ticket
+end
+
+== 05 / NGƯỜI GỬI TRA CỨU TRẠNG THÁI VÀ LỊCH SỬ ==
+U -> UI: Mở chi tiết ticket
+UI -> CC: GET /api/complaints/{id}/history
+CC -> CS: getHistoryForOwner(userId, ticketId)
+CS -> CR: checkOwnerAndGetHistory(ticketId, userId)
+CR --> CS: Trạng thái hiện tại + lịch sử
+CS --> CC: Complaint + history
+CC --> UI: HTTP 200 + dữ liệu ticket
+UI --> U: Hiển thị tiến độ / kết quả / yêu cầu bổ sung
+note over U,GHTK: NEW, UNKNOWN, FORWARDED... là trạng thái minh họa nội bộ; đối chiếu D03 và D08 trước khi triển khai.
+
+@enduml
